@@ -137,7 +137,7 @@ export default function ChatPage() {
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         {messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center p-8 text-center">
-            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/70 shadow-lg">
+            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-md bg-primary shadow-lg">
               <Sparkles className="w-8 h-8 text-primary-foreground" />
             </div>
             <h2 className="mb-2 font-serif text-4xl leading-none tracking-[-0.04em] text-foreground">Ask me anything about math</h2>
@@ -172,7 +172,7 @@ export default function ChatPage() {
                   className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   {msg.role === "assistant" && (
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
+                    <div className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-sm bg-primary shadow-sm">
                       <Sparkles className="w-4 h-4 text-primary-foreground" />
                     </div>
                   )}
@@ -205,7 +205,7 @@ export default function ChatPage() {
                 animate={{ opacity: 1 }}
                 className="flex gap-3"
               >
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0 shadow-sm">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-sm bg-primary shadow-sm">
                   <Sparkles className="w-4 h-4 text-primary-foreground" />
                 </div>
                 <div className="unimath-panel rounded-2xl rounded-bl-md px-4 py-3">

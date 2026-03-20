@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ReactFlow,
   Background,
@@ -76,9 +76,7 @@ function TopicNodeComponent({ data }: { data: TopicNodeData }) {
     <div
       className="relative flex h-[156px] w-[156px] items-center justify-center rounded-full border text-center shadow-lg transition-all duration-200 hover:-translate-y-1"
       style={{
-        background: practiced
-          ? `radial-gradient(circle at 50% 35%, rgba(255,255,255,0.05), transparent 48%), linear-gradient(180deg, rgba(11,15,18,0.98), ${data.heatColor}20)`
-          : "linear-gradient(180deg, rgba(11,15,18,0.98), rgba(15,23,42,0.9))",
+        background: practiced ? `rgba(37,34,32,0.98)` : "rgba(31,28,25,0.96)",
         borderColor: practiced ? `${data.heatColor}cc` : "rgba(148,163,184,0.18)",
         boxShadow: practiced
           ? `0 16px 34px rgba(2,6,23,0.46), 0 0 0 2px ${data.heatColor}22, 0 0 28px ${data.glowColor}28`
@@ -120,38 +118,29 @@ function TopicNodeComponent({ data }: { data: TopicNodeData }) {
 
 function PracticeHeatLegend() {
   return (
-    <Card className="w-64 border-border/50 bg-background/92 shadow-xl">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Sparkles className="h-4 w-4 text-primary" />
-          Practice heat guide
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {HEAT_TIERS.map((tier) => (
-          <div
-            key={tier.label}
-            className="flex items-center justify-between gap-3 rounded-xl border border-white/6 bg-black/20 px-3 py-2.5"
-          >
-            <div className="flex items-center gap-3">
-              <span
-                className="h-4 w-4 rounded-full border"
-                style={{
-                  backgroundColor: tier.bg,
-                  borderColor: tier.color,
-                  boxShadow: `0 0 0 1px ${tier.color}22, 0 0 12px ${tier.color}22`,
-                }}
-              />
-              <span className="text-sm font-medium text-foreground">{tier.label}</span>
-            </div>
-            <span className="text-xs text-muted-foreground">questions</span>
-          </div>
-        ))}
-        <p className="text-xs leading-5 text-muted-foreground">
-          Higher practice counts use brighter rings and fills so strong topics stand out at a glance.
-        </p>
-      </CardContent>
-    </Card>
+    <div className="flex flex-wrap items-center justify-end gap-2">
+      <div className="inline-flex items-center gap-2 px-1 py-1 text-sm text-foreground">
+        <Sparkles className="h-4 w-4 text-primary" />
+        <span className="font-medium">Practice heat guide</span>
+      </div>
+      {HEAT_TIERS.map((tier) => (
+        <div
+          key={tier.label}
+          className="unimath-panel-muted flex items-center gap-2 rounded-sm px-3 py-2 text-xs text-muted-foreground"
+        >
+          <span
+            className="h-3.5 w-3.5 rounded-full border"
+            style={{
+              backgroundColor: tier.bg,
+              borderColor: tier.color,
+              boxShadow: `0 0 0 1px ${tier.color}22`,
+            }}
+          />
+          <span className="font-medium text-foreground">{tier.label}</span>
+          <span>questions</span>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -287,17 +276,6 @@ export default function MapPage() {
     });
   }, []);
 
-  const categoryStats = useMemo(() => {
-    const stats: Record<string, { total: number; practiced: number }> = {};
-    for (const t of DEFAULT_TOPICS) {
-      if (!stats[t.category]) stats[t.category] = { total: 0, practiced: 0 };
-      stats[t.category].total++;
-      const userData = userTopics.find((ut) => ut.topic_name === t.name);
-      if (userData && userData.practice_count > 0) stats[t.category].practiced++;
-    }
-    return stats;
-  }, [userTopics]);
-
   return (
     <div className="h-full flex flex-col">
       <div className="px-6 py-4 border-b border-border/50 bg-background/80 backdrop-blur-xl flex items-center justify-between">
@@ -309,13 +287,7 @@ export default function MapPage() {
             Your mathematical journey visualized. Practiced topics light up.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {Object.entries(categoryStats).map(([cat, s]) => (
-            <Badge key={cat} variant="outline" className="text-xs rounded-full">
-              {cat}: {s.practiced}/{s.total}
-            </Badge>
-          ))}
-        </div>
+        <PracticeHeatLegend />
       </div>
 
       <div className="flex-1 relative">
@@ -341,14 +313,6 @@ export default function MapPage() {
             nodeColor={(node) => ((node.data as TopicNodeData | undefined)?.heatColor ?? "rgba(71,85,105,0.7)")}
           />
         </ReactFlow>
-
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="absolute left-4 top-4 z-10"
-        >
-          <PracticeHeatLegend />
-        </motion.div>
 
         <AnimatePresence>
           {selectedTopic && (

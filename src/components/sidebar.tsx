@@ -90,11 +90,10 @@ export function AppSidebar({ user }: { user: User }) {
   return (
     <aside
       className={cn(
-        "relative flex h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar/90 backdrop-blur-xl transition-all duration-300",
+        "relative z-40 flex h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar/90 backdrop-blur-xl transition-all duration-300",
         collapsed ? "w-[92px]" : "w-[290px]"
       )}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.1),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent_26%)]" />
       <div className="editorial-grid absolute inset-0 opacity-[0.05]" />
       <div
         className={cn(
@@ -102,7 +101,7 @@ export function AppSidebar({ user }: { user: User }) {
           collapsed ? "justify-center" : "gap-4"
         )}
       >
-        <div className="unimath-panel-muted flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl">
+        <div className="unimath-panel-muted flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-md">
           <span className="font-serif text-xl font-semibold text-foreground">U</span>
         </div>
         {!collapsed && (
@@ -120,7 +119,7 @@ export function AppSidebar({ user }: { user: User }) {
         variant="ghost"
         size="icon"
         className={cn(
-          "unimath-panel absolute top-6 z-20 h-9 w-9 rounded-full text-muted-foreground shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:text-foreground",
+          "unimath-panel absolute top-6 z-[200] h-9 w-9 rounded-sm text-muted-foreground shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:text-foreground",
           collapsed ? "-right-4" : "-right-4"
         )}
         onClick={handleToggleSidebar}
@@ -137,7 +136,7 @@ export function AppSidebar({ user }: { user: User }) {
               key={item.href}
               href={item.href}
               className={cn(
-                "group flex items-center rounded-2xl text-sm font-medium transition-all duration-200",
+                "group flex items-center rounded-md text-sm font-medium transition-all duration-200",
                 collapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-3",
                 isActive
                   ? "bg-primary text-primary-foreground shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
@@ -166,7 +165,7 @@ export function AppSidebar({ user }: { user: User }) {
         <button
           onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
           className={cn(
-            "flex w-full items-center rounded-2xl text-sm font-medium text-sidebar-foreground/66 transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+            "flex w-full items-center rounded-md text-sm font-medium text-sidebar-foreground/66 transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-foreground",
             collapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-3"
           )}
           aria-label="Toggle theme"
@@ -183,7 +182,7 @@ export function AppSidebar({ user }: { user: User }) {
         <Link
           href="/settings"
           className={cn(
-            "flex items-center rounded-2xl text-sm font-medium transition-all duration-200",
+            "flex items-center rounded-md text-sm font-medium transition-all duration-200",
             collapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-3",
             pathname === "/settings"
               ? "bg-primary text-primary-foreground shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
@@ -198,7 +197,7 @@ export function AppSidebar({ user }: { user: User }) {
         <button
           onClick={handleSignOut}
           className={cn(
-            "flex w-full items-center rounded-2xl text-sm font-medium text-sidebar-foreground/66 transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+            "flex w-full items-center rounded-md text-sm font-medium text-sidebar-foreground/66 transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-foreground",
             collapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-3"
           )}
           aria-label="Sign out"
@@ -211,7 +210,7 @@ export function AppSidebar({ user }: { user: User }) {
 
         <div
           className={cn(
-            "unimath-panel-muted rounded-[1.5rem] px-3 py-3",
+            "unimath-panel-muted rounded-md px-3 py-3",
             collapsed ? "flex justify-center" : "flex items-center gap-3"
           )}
         >

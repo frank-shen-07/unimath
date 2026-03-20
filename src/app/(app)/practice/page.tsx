@@ -259,7 +259,7 @@ export default function PracticePage() {
           <motion.div key="results" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
             <Card className="border-border/50">
               <CardContent className="p-8 text-center space-y-6">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mx-auto shadow-lg">
+                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-md bg-primary shadow-lg">
                   <Trophy className="w-10 h-10 text-primary-foreground" />
                 </div>
                 <div>

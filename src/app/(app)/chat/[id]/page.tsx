@@ -189,7 +189,7 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
                 className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 {msg.role === "assistant" && (
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
+                  <div className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-sm bg-primary shadow-sm">
                     <Sparkles className="w-4 h-4 text-primary-foreground" />
                   </div>
                 )}
@@ -214,7 +214,7 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
           </AnimatePresence>
           {isLoading && messages[messages.length - 1]?.role === "user" && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0 shadow-sm">
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-sm bg-primary shadow-sm">
                 <Sparkles className="w-4 h-4 text-primary-foreground" />
               </div>
               <div className="unimath-panel rounded-2xl rounded-bl-md px-4 py-3">

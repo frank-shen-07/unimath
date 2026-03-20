@@ -19,7 +19,6 @@ export function EditorialPage({
       )}
     >
       <div className="editorial-grid pointer-events-none absolute inset-0 opacity-[0.08]" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,rgba(232,216,204,0.12),transparent_68%)]" />
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
         {children}
       </div>
@@ -42,7 +41,7 @@ export function EditorialHeader({
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="unimath-panel relative overflow-hidden rounded-[2rem] p-6 lg:p-8"
+      className="unimath-panel relative overflow-hidden rounded-xl p-6 lg:p-8"
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/8 dark:bg-white/6" />
       <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1fr),auto]">
@@ -79,7 +78,7 @@ export function EditorialPanel({
   return (
     <div
       className={cn(
-        "unimath-panel relative overflow-hidden rounded-[1.75rem] p-5 sm:p-6",
+        "unimath-panel relative overflow-hidden rounded-lg p-5 sm:p-6",
         className
       )}
     >
@@ -99,7 +98,7 @@ export function EditorialStat({
   detail?: string;
 }) {
   return (
-    <div className="unimath-panel-muted rounded-[1.5rem] p-4">
+    <div className="unimath-panel-muted rounded-md p-4">
       <p className="font-label text-[11px] text-muted-foreground">{label}</p>
       <p className="mt-3 font-serif text-3xl leading-none tracking-[-0.04em] text-foreground">
         {value}

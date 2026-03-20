@@ -1,9 +1,33 @@
+import { extractTextFromDocument } from "@/lib/document-text";
 import { generateFlashcards } from "@/lib/gemini";
 import { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const { topic, notes, count } = await request.json();
+    const contentType = request.headers.get("content-type") || "";
+    let topic = "";
+    let notes = "";
+    let count = 10;
+
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      topic = String(formData.get("topic") || "").trim();
+      notes = String(formData.get("notes") || "").trim();
+      count = Number(formData.get("count") || 10);
+
+      const file = formData.get("document");
+      if (file instanceof File && file.size > 0) {
+        const documentText = await extractTextFromDocument(file);
+        notes = [notes, `Document: ${file.name}\n\n${documentText}`]
+          .filter(Boolean)
+          .join("\n\n");
+      }
+    } else {
+      const payload = await request.json();
+      topic = String(payload.topic || "").trim();
+      notes = String(payload.notes || "").trim();
+      count = Number(payload.count || 10);
+    }
 
     if (!topic && !notes) {
       return Response.json(
@@ -15,10 +39,13 @@ export async function POST(request: NextRequest) {
     const result = await generateFlashcards({
       topic,
       notes,
-      count: count ?? 10,
+      count: count || 10,
     });
 
-    return Response.json(result);
+    return Response.json({
+      ...result,
+      sourceText: notes || null,
+    });
   } catch (error) {
     console.error("Flashcards API error:", error);
     return Response.json(
