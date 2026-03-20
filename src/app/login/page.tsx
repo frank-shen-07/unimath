@@ -129,15 +129,15 @@ export default function LoginPage() {
         <Home className="h-5 w-5" />
       </Link>
 
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center">
-        <div className="unimath-panel w-full overflow-hidden rounded-xl">
+      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-5xl items-center">
+        <div className="unimath-panel mx-auto w-full overflow-hidden rounded-xl">
           <motion.div
             className="flex w-[200%]"
             animate={{ x: isLogin ? "0%" : "-50%" }}
             transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="w-1/2 shrink-0 px-6 py-6 sm:px-8 lg:px-10 lg:py-10">
-              <div className="grid gap-6 lg:grid-cols-[0.8fr,1.2fr] lg:items-center">
+            <div className="w-1/2 shrink-0 px-6 py-8 sm:px-8 lg:px-10 lg:py-12">
+              <div className="grid gap-8 lg:grid-cols-[0.85fr,1.15fr] lg:items-center">
                 <div className="flex min-h-[220px] items-center justify-center">
                   <div className="max-w-sm text-center lg:text-left">
                     <p className="font-serif text-4xl leading-tight tracking-[-0.05em] text-foreground sm:text-5xl">
@@ -153,7 +153,7 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                <div className="unimath-panel-muted rounded-lg p-6 sm:p-8">
+                <div className="unimath-panel-muted mx-auto w-full max-w-[560px] rounded-lg p-6 sm:p-8">
                   <div className="mb-8">
                     <p className="font-label text-[11px] text-muted-foreground">Welcome back</p>
                     <h1 className="mt-3 font-serif text-5xl leading-none tracking-[-0.04em] text-foreground">
@@ -238,9 +238,9 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="w-1/2 shrink-0 px-6 py-6 sm:px-8 lg:px-10 lg:py-10">
-              <div className="grid gap-6 lg:grid-cols-[1.2fr,0.8fr] lg:items-center">
-                <div className="unimath-panel-muted rounded-lg p-6 sm:p-8">
+            <div className="w-1/2 shrink-0 px-6 py-8 sm:px-8 lg:px-10 lg:py-12">
+              <div className="grid gap-8 lg:grid-cols-[1.15fr,0.85fr] lg:items-center">
+                <div className="unimath-panel-muted mx-auto w-full max-w-[560px] rounded-lg p-6 sm:p-8">
                   <div className="mb-6">
                     <p className="font-label text-[11px] text-muted-foreground">Create account</p>
                     <h1 className="mt-3 font-serif text-5xl leading-none tracking-[-0.04em] text-foreground">

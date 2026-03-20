@@ -76,11 +76,15 @@ function TopicNodeComponent({ data }: { data: TopicNodeData }) {
     <div
       className="relative flex h-[156px] w-[156px] items-center justify-center rounded-full border text-center shadow-lg transition-all duration-200 hover:-translate-y-1"
       style={{
-        background: practiced ? data.fillColor : "rgba(31,28,25,0.96)",
-        borderColor: practiced ? `${data.heatColor}cc` : "rgba(148,163,184,0.18)",
+        background: practiced
+          ? data.fillColor
+          : "color-mix(in oklab, var(--background) 88%, white)",
+        borderColor: practiced
+          ? `${data.heatColor}cc`
+          : "rgb(from var(--foreground) r g b / 0.2)",
         boxShadow: practiced
           ? `0 16px 34px rgba(2,6,23,0.46), 0 0 0 2px ${data.heatColor}22, 0 0 28px ${data.glowColor}28`
-          : "0 14px 32px rgba(2,6,23,0.38)",
+          : "0 14px 32px rgba(2,6,23,0.18)",
       }}
     >
       <Handle type="target" position={Position.Left} className="!h-2.5 !w-2.5 !border-0 !bg-primary/80" />
@@ -90,17 +94,21 @@ function TopicNodeComponent({ data }: { data: TopicNodeData }) {
         >
           {data.category}
         </span>
-        <p className="line-clamp-3 text-sm font-semibold leading-5 text-slate-100">
+        <p className="line-clamp-3 text-sm font-semibold leading-5 text-foreground">
           {data.label}
         </p>
         <div className="flex flex-col items-center gap-1">
           <span
             className="text-[11px] font-medium"
-            style={{ color: practiced ? data.heatColor : "rgba(148,163,184,0.72)" }}
+            style={{
+              color: practiced
+                ? data.heatColor
+                : "rgb(from var(--foreground) r g b / 0.6)",
+            }}
           >
             {practiced ? `${data.practiceCount} solved` : "Not practiced"}
           </span>
-          <div className="h-1.5 w-16 overflow-hidden rounded-full bg-white/6">
+          <div className="h-1.5 w-16 overflow-hidden rounded-full bg-foreground/8">
             <div
               className="h-full rounded-full transition-all"
               style={{
@@ -279,12 +287,12 @@ export default function MapPage() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between gap-4 overflow-x-auto border-b border-border/50 bg-background/80 px-6 py-4 backdrop-blur-xl">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+      <div className="flex items-start justify-between gap-8 overflow-x-auto border-b border-border/50 bg-background/80 px-6 py-6 backdrop-blur-xl">
+        <div className="space-y-1.5 pr-4">
+          <h1 className="flex items-center gap-2 text-2xl font-bold">
             <Map className="w-6 h-6 text-primary" /> Knowledge Map
           </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
+          <p className="text-sm text-muted-foreground">
             Your mathematical journey visualized.
           </p>
         </div>
@@ -307,7 +315,7 @@ export default function MapPage() {
           nodesDraggable
         >
           <Background gap={18} size={1} color="rgba(99,102,241,0.12)" />
-          <Controls className="!rounded-xl !border-border/50 !shadow-lg [&_button]:!border-border/60 [&_button]:!bg-primary [&_button]:!text-black [&_button_svg]:!stroke-black [&_button_path]:!stroke-black" />
+          <Controls className="!rounded-lg !border-border/40 !bg-white/95 !shadow-lg dark:!bg-card [&_button]:!border-border/40 [&_button]:!bg-white [&_button]:!text-black dark:[&_button]:!bg-card dark:[&_button]:!text-foreground [&_button_svg]:!stroke-black dark:[&_button_svg]:!stroke-current [&_button_path]:!stroke-black dark:[&_button_path]:!stroke-current" />
         </ReactFlow>
 
         <AnimatePresence>

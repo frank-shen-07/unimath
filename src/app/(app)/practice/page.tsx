@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -15,11 +15,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Dumbbell, Loader2, Check, X, ArrowRight, RotateCcw, Trophy } from "lucide-react";
 import type { GeneratedQuestion } from "@/lib/types";
 import { TopicAutocomplete } from "@/components/topic-autocomplete";
+import { VisualEquationButton } from "@/components/visual-equation-button";
+import { insertLatexAtCursor } from "@/lib/insert-latex";
 
 type Phase = "setup" | "practice" | "results";
 
 export default function PracticePage() {
   const searchParams = useSearchParams();
+  const answerInputRef = useRef<HTMLInputElement>(null);
   const [topic, setTopic] = useState("");
   const [difficulty, setDifficulty] = useState("");
 
@@ -128,6 +131,19 @@ export default function PracticePage() {
   const currentQuestion = questions[currentIndex];
   const correctCount = results.filter(Boolean).length;
 
+  const handleInsertEquation = (latex: string) => {
+    const { nextValue, selectionStart } = insertLatexAtCursor(
+      answerInputRef.current,
+      userAnswer,
+      latex
+    );
+    setUserAnswer(nextValue);
+    window.requestAnimationFrame(() => {
+      answerInputRef.current?.focus();
+      answerInputRef.current?.setSelectionRange(selectionStart, selectionStart);
+    });
+  };
+
   return (
     <EditorialPage className="max-w-none">
       <div className="mx-auto w-full max-w-4xl space-y-6">
@@ -212,15 +228,22 @@ export default function PracticePage() {
 
                 {!showSolution ? (
                   <div className="space-y-3">
-                    <Input
-                      value={userAnswer}
-                      onChange={(e) => setUserAnswer(e.target.value)}
-                      placeholder="Type your answer..."
-                      className="rounded-xl border-border/50"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleCheck();
-                      }}
-                    />
+                    <div className="flex items-center gap-2">
+                      <Input
+                        ref={answerInputRef}
+                        value={userAnswer}
+                        onChange={(e) => setUserAnswer(e.target.value)}
+                        placeholder="Type your answer..."
+                        className="rounded-xl border-border/50"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleCheck();
+                        }}
+                      />
+                      <VisualEquationButton
+                        onInsert={handleInsertEquation}
+                        title="Insert equation into answer"
+                      />
+                    </div>
                     <div className="flex gap-2">
                       <Button onClick={handleCheck} disabled={isChecking} className="flex-1 rounded-xl">
                         {isChecking ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}

@@ -196,7 +196,7 @@ export async function classifyTopic(question: string): Promise<string> {
   const ai = getAI();
   const prompt = `Classify this math question into exactly one of these university math topic names. Return ONLY the topic name, nothing else.
 
-Topics: Sets and Functions, Logic and Proofs, Number Theory, Graph Theory, Limits, Derivatives, Integration, Series and Sequences, Multivariable Calculus, Vectors, Matrices, Vector Spaces, Linear Transformations, Eigenvalues and Eigenvectors, Combinatorics, Probability, Statistics, First-Order ODEs, Second-Order ODEs, Laplace Transforms, Partial Differential Equations, Numerical Methods, Optimization, Fourier Analysis, Real Analysis, Complex Analysis, Measure Theory, Groups, Rings and Fields, Modules and Representations, Point-Set Topology, Algebraic Topology, Differential Topology
+Topics: Sets and Functions, Logic and Proofs, Number Theory, Graph Theory, Limits, Derivatives, Integration, Series and Sequences, Multivariable Calculus, Vector Calculus, Vectors, Matrices, Vector Spaces, Linear Transformations, Eigenvalues and Eigenvectors, Combinatorics, Probability, Statistics, First-Order ODEs, Second-Order ODEs, Laplace Transforms, Partial Differential Equations, Numerical Methods, Optimization, Fourier Analysis, Real Analysis, Complex Analysis, Measure Theory, Groups, Rings and Fields, Modules and Representations, Point-Set Topology, Algebraic Topology, Differential Topology
 
 Question: ${question}`;
 

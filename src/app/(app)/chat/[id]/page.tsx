@@ -4,6 +4,8 @@ import { useState, useRef, useEffect, use } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MathRenderer } from "@/components/math-renderer";
+import { VisualEquationButton } from "@/components/visual-equation-button";
+import { insertLatexAtCursor } from "@/lib/insert-latex";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, ImagePlus, X, Loader2, Sparkles, ArrowLeft } from "lucide-react";
@@ -27,6 +29,7 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -155,6 +158,19 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
     }
   };
 
+  const handleInsertEquation = (latex: string) => {
+    const { nextValue, selectionStart } = insertLatexAtCursor(
+      textareaRef.current,
+      input,
+      latex
+    );
+    setInput(nextValue);
+    window.requestAnimationFrame(() => {
+      textareaRef.current?.focus();
+      textareaRef.current?.setSelectionRange(selectionStart, selectionStart);
+    });
+  };
+
   if (pageLoading) {
     return (
       <div className="mx-auto max-w-3xl space-y-4 p-6">
@@ -244,24 +260,26 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
             <Button
               variant="outline"
               size="icon"
-              className="unimath-input h-12 w-12 flex-shrink-0 rounded-xl"
+              className="unimath-input h-14 w-12 flex-shrink-0 rounded-xl"
               onClick={() => fileInputRef.current?.click()}
             >
               <ImagePlus className="w-4 h-4" />
             </Button>
+            <VisualEquationButton onInsert={handleInsertEquation} title="Insert equation into chat" />
             <Textarea
+              ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Continue the conversation..."
-              className="unimath-input min-h-[60px] max-h-40 resize-none rounded-xl px-4 py-4"
-              rows={2}
+              className="unimath-input min-h-[76px] max-h-48 resize-none rounded-xl px-4 py-5"
+              rows={3}
             />
             <Button
               onClick={handleSubmit}
               disabled={isLoading || (!input.trim() && !imageFile)}
               size="icon"
-              className="h-12 w-12 flex-shrink-0 rounded-xl"
+              className="h-14 w-12 flex-shrink-0 rounded-xl"
             >
               {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </Button>

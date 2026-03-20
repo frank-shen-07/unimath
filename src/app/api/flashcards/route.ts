@@ -2,6 +2,8 @@ import { extractTextFromDocument } from "@/lib/document-text";
 import { generateFlashcards } from "@/lib/gemini";
 import { NextRequest } from "next/server";
 
+export const runtime = "nodejs";
+
 export async function POST(request: NextRequest) {
   try {
     const contentType = request.headers.get("content-type") || "";
@@ -49,7 +51,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Flashcards API error:", error);
     return Response.json(
-      { error: "Failed to generate flashcards" },
+      { error: error instanceof Error ? error.message : "Failed to generate flashcards" },
       { status: 500 }
     );
   }

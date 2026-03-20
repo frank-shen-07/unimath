@@ -49,7 +49,7 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    const fullQuote = MATH_QUOTES[quoteIndex] ?? "";
+    const fullQuote = (MATH_QUOTES[quoteIndex] ?? "").trimEnd();
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     const typeNext = (index: number) => {

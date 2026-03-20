@@ -41,10 +41,7 @@ export default function LandingPage() {
             <div className="unimath-panel-muted flex h-10 w-10 items-center justify-center rounded-md">
               <span className="font-serif text-xl font-semibold text-foreground">U</span>
             </div>
-            <div>
-              <p className="font-label text-[10px] text-muted-foreground">Study OS</p>
-              <span className="font-serif text-2xl leading-none tracking-[-0.04em]">UniMathMate</span>
-            </div>
+            <span className="font-serif text-2xl leading-none tracking-[-0.04em]">UniMathMate</span>
           </div>
           <div className="flex items-center gap-3">
             <Link

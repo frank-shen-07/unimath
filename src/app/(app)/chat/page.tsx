@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MathRenderer } from "@/components/math-renderer";
+import { VisualEquationButton } from "@/components/visual-equation-button";
+import { insertLatexAtCursor } from "@/lib/insert-latex";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, ImagePlus, X, Loader2, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -131,6 +133,19 @@ export default function ChatPage() {
     }
   };
 
+  const handleInsertEquation = (latex: string) => {
+    const { nextValue, selectionStart } = insertLatexAtCursor(
+      textareaRef.current,
+      input,
+      latex
+    );
+    setInput(nextValue);
+    window.requestAnimationFrame(() => {
+      textareaRef.current?.focus();
+      textareaRef.current?.setSelectionRange(selectionStart, selectionStart);
+    });
+  };
+
   return (
     <div className="flex h-full flex-col">
       {/* Messages */}
@@ -223,25 +238,26 @@ export default function ChatPage() {
             <Button
               variant="outline"
               size="icon"
-              className="unimath-input h-12 w-12 flex-shrink-0 rounded-xl"
+              className="unimath-input h-14 w-12 flex-shrink-0 rounded-xl"
               onClick={() => fileInputRef.current?.click()}
             >
               <ImagePlus className="w-[18px] h-[18px]" />
             </Button>
+            <VisualEquationButton onInsert={handleInsertEquation} title="Insert equation into chat" />
             <Textarea
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type your math question..."
-              className="unimath-input min-h-[60px] max-h-40 resize-none rounded-xl px-4 py-4"
-              rows={2}
+              className="unimath-input min-h-[76px] max-h-48 resize-none rounded-xl px-4 py-5"
+              rows={3}
             />
             <Button
               onClick={handleSubmit}
               disabled={isLoading || (!input.trim() && !imageFile)}
               size="icon"
-              className="h-12 w-12 flex-shrink-0 rounded-xl"
+              className="h-14 w-12 flex-shrink-0 rounded-xl"
             >
               {isLoading ? (
                 <Loader2 className="w-[18px] h-[18px] animate-spin" />

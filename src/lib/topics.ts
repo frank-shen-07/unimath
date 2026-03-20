@@ -14,6 +14,7 @@ export interface DefaultEdge {
 
 export const TOPIC_CATEGORIES = [
   "Basic Calculus",
+  "Multivariable & Vector Calculus",
   "Linear Algebra",
   "Probability and Statistics",
   "Applied Maths",
@@ -26,6 +27,7 @@ export const TOPIC_CATEGORIES = [
 
 export const CATEGORY_COLORS: Record<string, { bg: string; border: string; text: string }> = {
   "Basic Calculus": { bg: "bg-blue-50/80 dark:bg-blue-950/30", border: "border-blue-400/60 dark:border-blue-500/40", text: "text-blue-700 dark:text-blue-200" },
+  "Multivariable & Vector Calculus": { bg: "bg-cyan-50/80 dark:bg-cyan-950/30", border: "border-cyan-400/60 dark:border-cyan-500/40", text: "text-cyan-700 dark:text-cyan-200" },
   "Linear Algebra": { bg: "bg-violet-50/80 dark:bg-violet-950/30", border: "border-violet-400/60 dark:border-violet-500/40", text: "text-violet-700 dark:text-violet-200" },
   "Probability and Statistics": { bg: "bg-emerald-50/80 dark:bg-emerald-950/30", border: "border-emerald-400/60 dark:border-emerald-500/40", text: "text-emerald-700 dark:text-emerald-200" },
   "Applied Maths": { bg: "bg-cyan-50/80 dark:bg-cyan-950/30", border: "border-cyan-400/60 dark:border-cyan-500/40", text: "text-cyan-700 dark:text-cyan-200" },
@@ -38,8 +40,9 @@ export const CATEGORY_COLORS: Record<string, { bg: string; border: string; text:
 
 export const CATEGORY_CENTERS: Record<string, { x: number; y: number }> = {
   "Discrete Maths": { x: -420, y: -150 },
-  "Basic Calculus": { x: -120, y: -170 },
-  "Linear Algebra": { x: 240, y: -170 },
+  "Basic Calculus": { x: -170, y: -170 },
+  "Multivariable & Vector Calculus": { x: 70, y: -140 },
+  "Linear Algebra": { x: 320, y: -170 },
   "Probability and Statistics": { x: 520, y: -140 },
   "Differential Equations": { x: -120, y: 160 },
   "Applied Maths": { x: 250, y: 160 },
@@ -58,7 +61,8 @@ export const DEFAULT_TOPICS: DefaultTopic[] = [
   { id: "derivatives", name: "Derivatives", category: "Basic Calculus", x: -110, y: -160 },
   { id: "integration", name: "Integration", category: "Basic Calculus", x: -10, y: -210 },
   { id: "series", name: "Series and Sequences", category: "Basic Calculus", x: 90, y: -135 },
-  { id: "multivariable", name: "Multivariable Calculus", category: "Basic Calculus", x: -60, y: -50 },
+  { id: "multivariable", name: "Multivariable Calculus", category: "Multivariable & Vector Calculus", x: -10, y: -80 },
+  { id: "vector-calculus", name: "Vector Calculus", category: "Multivariable & Vector Calculus", x: 110, y: -20 },
 
   { id: "vectors", name: "Vectors", category: "Linear Algebra", x: 140, y: -245 },
   { id: "matrices", name: "Matrices", category: "Linear Algebra", x: 250, y: -180 },
@@ -101,6 +105,7 @@ export const DEFAULT_EDGES: DefaultEdge[] = [
   { source: "derivatives", target: "integration", label: "within-group" },
   { source: "integration", target: "series", label: "within-group" },
   { source: "derivatives", target: "multivariable", label: "within-group" },
+  { source: "multivariable", target: "vector-calculus", label: "within-group" },
 
   { source: "vectors", target: "matrices", label: "within-group" },
   { source: "matrices", target: "vector-spaces", label: "within-group" },
@@ -145,6 +150,12 @@ export const CATEGORY_TO_TOPICS = DEFAULT_TOPICS.reduce<Record<string, string[]>
 
 const CATEGORY_ALIASES: Record<string, string[]> = {
   "Basic Calculus": ["basic calculus", "calculus"],
+  "Multivariable & Vector Calculus": [
+    "multivariable and vector calculus",
+    "multivariable vector calculus",
+    "multivariable calculus",
+    "vector calculus",
+  ],
   "Linear Algebra": ["linear algebra"],
   "Probability and Statistics": [
     "probability and statistics",

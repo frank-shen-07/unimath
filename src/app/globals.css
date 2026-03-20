@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "mathlive/static.css";
+@import "mathlive/fonts.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -83,7 +85,7 @@
   --accent: #ece0d7;
   --accent-foreground: var(--surface-900);
   --destructive: var(--fail);
-  --border: rgb(122 114 110 / 0.16);
+  --border: rgb(122 114 110 / 0.1);
   --input: rgb(255 255 255 / 0.56);
   --ring: rgb(26 22 20 / 0.18);
   --chart-1: var(--violet);
@@ -91,14 +93,14 @@
   --chart-3: var(--sky);
   --chart-4: var(--teal);
   --chart-5: var(--amber);
-  --radius: 0.45rem;
+  --radius: 0.32rem;
   --sidebar: rgb(255 255 255 / 0.42);
   --sidebar-foreground: var(--surface-900);
   --sidebar-primary: var(--accent-strong);
   --sidebar-primary-foreground: var(--surface-0);
   --sidebar-accent: rgb(26 22 20 / 0.06);
   --sidebar-accent-foreground: var(--surface-900);
-  --sidebar-border: rgb(122 114 110 / 0.14);
+  --sidebar-border: rgb(122 114 110 / 0.1);
   --sidebar-ring: rgb(26 22 20 / 0.18);
 }
 
@@ -136,7 +138,7 @@
   --accent: #322f2c;
   --accent-foreground: var(--surface-900);
   --destructive: var(--fail);
-  --border: rgb(138 132 125 / 0.18);
+  --border: rgb(138 132 125 / 0.12);
   --input: rgb(37 34 32 / 0.88);
   --ring: rgb(232 216 204 / 0.28);
   --chart-1: var(--violet);
@@ -150,7 +152,7 @@
   --sidebar-primary-foreground: var(--accent-strong);
   --sidebar-accent: rgb(232 221 210 / 0.05);
   --sidebar-accent-foreground: var(--surface-900);
-  --sidebar-border: rgb(138 132 125 / 0.16);
+  --sidebar-border: rgb(138 132 125 / 0.12);
   --sidebar-ring: rgb(232 216 204 / 0.24);
 }
 
@@ -211,7 +213,7 @@
 @utility unimath-panel {
   border: 1px solid rgb(from var(--border) r g b / 0.9);
   background: var(--card);
-  box-shadow: 0 16px 40px rgb(0 0 0 / 0.14);
+  box-shadow: 0 16px 40px rgb(0 0 0 / 0.12);
   backdrop-filter: blur(18px);
 }
 

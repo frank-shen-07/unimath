@@ -10,6 +10,8 @@ import { createClient } from "@/lib/supabase/client";
 import { DEFAULT_TOPICS } from "@/lib/topics";
 import { TopicAutocomplete } from "@/components/topic-autocomplete";
 import { EditorialPage, EditorialPanel } from "@/components/editorial";
+import { VisualEquationButton } from "@/components/visual-equation-button";
+import { insertLatexAtCursor } from "@/lib/insert-latex";
 import type { FlashcardDeck, GeneratedFlashcard } from "@/lib/types";
 import { BookCopy, FileText, Loader2, Sparkles, Upload, Wand2 } from "lucide-react";
 import { toast } from "sonner";
@@ -18,6 +20,7 @@ export default function FlashcardsPage() {
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const notesRef = useRef<HTMLTextAreaElement>(null);
 
   const [topic, setTopic] = useState("");
   const [count, setCount] = useState(10);
@@ -149,6 +152,19 @@ export default function FlashcardsPage() {
     }
   }
 
+  const handleInsertEquation = (latex: string) => {
+    const { nextValue, selectionStart } = insertLatexAtCursor(
+      notesRef.current,
+      notes,
+      latex
+    );
+    setNotes(nextValue);
+    window.requestAnimationFrame(() => {
+      notesRef.current?.focus();
+      notesRef.current?.setSelectionRange(selectionStart, selectionStart);
+    });
+  };
+
   return (
     <EditorialPage>
       <div className="grid gap-6 xl:grid-cols-[1.05fr,0.95fr]">
@@ -178,12 +194,19 @@ export default function FlashcardsPage() {
               />
             </div>
 
-            <Textarea
-              value={notes}
-              onChange={(event) => setNotes(event.target.value)}
-              placeholder="Paste lecture notes, worked examples, or a syllabus chunk."
-              className="unimath-input min-h-40 rounded-md px-4 py-4 text-foreground placeholder:text-muted-foreground/60"
-            />
+            <div className="flex items-start gap-2">
+              <Textarea
+                ref={notesRef}
+                value={notes}
+                onChange={(event) => setNotes(event.target.value)}
+                placeholder="Paste lecture notes, worked examples, or a syllabus chunk."
+                className="unimath-input min-h-40 rounded-md px-4 py-4 text-foreground placeholder:text-muted-foreground/60"
+              />
+              <VisualEquationButton
+                onInsert={handleInsertEquation}
+                title="Insert equation into notes"
+              />
+            </div>
 
             <div className="flex flex-wrap items-center gap-3">
               <input

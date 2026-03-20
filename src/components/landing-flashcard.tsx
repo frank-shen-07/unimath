@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Layers } from "lucide-react";
 import { MathRenderer } from "@/components/math-renderer";
 
@@ -20,36 +21,40 @@ export function LandingFlashcard() {
       <button
         type="button"
         onClick={() => setFlipped((value) => !value)}
-        className="mt-5 block w-full text-left"
+        className="mt-5 block w-full text-left [perspective:2000px]"
         aria-label="Flip example flashcard"
       >
-        <div className="unimath-panel-muted min-h-[250px] rounded-lg p-6 transition hover:border-foreground/20">
-          <p className="font-label text-[11px] text-muted-foreground">
-            {flipped ? "Back" : "Front"}
-          </p>
-          <div className="mt-5 flex min-h-[170px] items-center justify-center">
-            <div className="max-w-md text-center">
-              {flipped ? (
-                <MathRenderer
-                  content={
-                    "For every non-zero vector $x$, a positive definite matrix satisfies $x^T A x > 0$."
-                  }
-                  className="font-serif text-2xl leading-relaxed tracking-[-0.03em] text-foreground sm:text-3xl"
-                />
-              ) : (
-                <MathRenderer
-                  content={
-                    "What does a positive definite matrix guarantee about $x^T A x$ for every non-zero vector $x$?"
-                  }
-                  className="font-serif text-2xl leading-relaxed tracking-[-0.03em] text-foreground sm:text-3xl"
-                />
-              )}
+        <motion.div
+          animate={{ rotateY: flipped ? 180 : 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="relative min-h-[250px] [transform-style:preserve-3d]"
+        >
+          <div className="unimath-panel-muted absolute inset-0 rounded-lg p-6 [backface-visibility:hidden]">
+            <p className="font-label text-[11px] text-muted-foreground">Front</p>
+            <div className="mt-5 flex min-h-[170px] items-center justify-center">
+              <MathRenderer
+                content={
+                  "What does a positive definite matrix guarantee about $\\vec{x}^{\\mathsf T}A\\vec{x}$ for every non-zero vector $\\vec{x}$?"
+                }
+                className="mx-auto max-w-md text-center font-serif text-2xl leading-relaxed tracking-[-0.03em] text-foreground sm:text-3xl"
+              />
             </div>
+            <p className="text-center text-sm text-muted-foreground">Click to reveal the answer.</p>
           </div>
-          <p className="text-center text-sm text-muted-foreground">
-            Click to {flipped ? "return to the prompt" : "reveal the answer"}.
-          </p>
-        </div>
+
+          <div className="unimath-panel-muted absolute inset-0 rounded-lg p-6 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+            <p className="font-label text-[11px] text-muted-foreground">Back</p>
+            <div className="mt-5 flex min-h-[170px] items-center justify-center">
+              <MathRenderer
+                content={
+                  "For every non-zero vector $\\vec{x}$, a positive definite matrix satisfies $\\vec{x}^{\\mathsf T}A\\vec{x} > 0$."
+                }
+                className="mx-auto max-w-md text-center font-serif text-2xl leading-relaxed tracking-[-0.03em] text-foreground sm:text-3xl"
+              />
+            </div>
+            <p className="text-center text-sm text-muted-foreground">Click to return to the prompt.</p>
+          </div>
+        </motion.div>
       </button>
     </div>
   );

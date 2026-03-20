@@ -22,11 +22,25 @@ export async function extractTextFromDocument(file: File) {
   ) {
     extractedText = buffer.toString("utf-8");
   } else if (file.type === "application/pdf" || extension === "pdf") {
-    const { PDFParse } = await import("pdf-parse");
-    const parser = new PDFParse({ data: buffer });
-    const result = await parser.getText();
-    extractedText = result.text;
-    await parser.destroy();
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const document = await pdfjs.getDocument({
+      data: new Uint8Array(buffer),
+      useWorkerFetch: false,
+      isEvalSupported: false,
+    }).promise;
+
+    const pages: string[] = [];
+    for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
+      const page = await document.getPage(pageNumber);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items
+        .map((item) => ("str" in item ? item.str : ""))
+        .join(" ");
+      pages.push(pageText);
+    }
+
+    extractedText = pages.join("\n\n");
+    await document.destroy();
   } else if (
     file.type ===
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||

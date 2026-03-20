@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { handleMathShortcutKeyDown } from "@/lib/math-input-shortcuts";
+import { insertLatexAtCursor } from "@/lib/insert-latex";
+import { VisualEquationButton } from "@/components/visual-equation-button";
 import {
   CATEGORY_TO_TOPICS,
   DEFAULT_TOPICS,
@@ -28,6 +30,7 @@ export function TopicAutocomplete({
   const [focused, setFocused] = useState(false);
   const [query, setQuery] = useState(value);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setQuery(value);
@@ -76,11 +79,27 @@ export function TopicAutocomplete({
 
   const showDropdown = focused && query.trim().length > 0 && filteredOptions.length > 0;
 
+  const handleInsertEquation = (latex: string) => {
+    const { nextValue, selectionStart } = insertLatexAtCursor(
+      inputRef.current,
+      query,
+      latex
+    );
+    setQuery(nextValue);
+    onChange(nextValue);
+    window.requestAnimationFrame(() => {
+      inputRef.current?.focus();
+      inputRef.current?.setSelectionRange(selectionStart, selectionStart);
+    });
+  };
+
   return (
     <div ref={wrapperRef} className={cn("relative", className)}>
-      <div className="relative">
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <input
+          ref={inputRef}
           value={query}
           onChange={(e) => {
             const nextValue = e.target.value;
@@ -93,6 +112,11 @@ export function TopicAutocomplete({
           onFocus={() => setFocused(true)}
           placeholder={placeholder}
           className="flex h-11 w-full rounded-xl border border-border/50 bg-card pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/15"
+        />
+        </div>
+        <VisualEquationButton
+          onInsert={handleInsertEquation}
+          title="Insert equation into topic field"
         />
       </div>
 
