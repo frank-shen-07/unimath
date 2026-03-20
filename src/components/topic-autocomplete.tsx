@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { handleMathShortcutKeyDown } from "@/lib/math-input-shortcuts";
 import {
   CATEGORY_TO_TOPICS,
   DEFAULT_TOPICS,
@@ -85,6 +86,9 @@ export function TopicAutocomplete({
             const nextValue = e.target.value;
             setQuery(nextValue);
             onChange(nextValue);
+          }}
+          onKeyDown={(event) => {
+            handleMathShortcutKeyDown(event);
           }}
           onFocus={() => setFocused(true)}
           placeholder={placeholder}

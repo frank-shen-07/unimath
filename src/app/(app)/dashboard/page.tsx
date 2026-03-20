@@ -5,13 +5,15 @@ import { createClient } from "@/lib/supabase/client";
 import { EditorialHeader, EditorialPage, EditorialPanel, EditorialStat } from "@/components/editorial";
 import type { FlashcardDeck, PracticeSession } from "@/lib/types";
 import { MATH_QUOTES } from "@/lib/math-quotes";
-import { Sparkles, TrendingUp } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 
 export default function DashboardPage() {
   const [sessions, setSessions] = useState<PracticeSession[]>([]);
   const [decks, setDecks] = useState<FlashcardDeck[]>([]);
   const [userName, setUserName] = useState("");
-  const [quoteIndex, setQuoteIndex] = useState(0);
+  const [quoteIndex, setQuoteIndex] = useState(() =>
+    Math.floor(Math.random() * MATH_QUOTES.length)
+  );
   const [typedQuote, setTypedQuote] = useState("");
 
   useEffect(() => {
@@ -47,14 +49,8 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    setQuoteIndex(Math.floor(Math.random() * MATH_QUOTES.length));
-  }, []);
-
-  useEffect(() => {
     const fullQuote = MATH_QUOTES[quoteIndex] ?? "";
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-    setTypedQuote("");
 
     const typeNext = (index: number) => {
       if (index <= fullQuote.length) {
@@ -67,7 +63,7 @@ export default function DashboardPage() {
       }
     };
 
-    typeNext(1);
+    timeoutId = setTimeout(() => typeNext(1), 24);
 
     return () => {
       if (timeoutId) {
@@ -88,22 +84,16 @@ export default function DashboardPage() {
       <EditorialHeader
         eyebrow="Dashboard"
         title={`Welcome back${userName ? `, ${userName}` : ""}`}
-        description={typedQuote}
+        description={
+          <>
+            {typedQuote}
+            <span className="ml-1 inline-block h-5 w-px animate-pulse bg-foreground/40 align-[-3px]" />
+          </>
+        }
       />
 
       <section>
         <EditorialPanel className="space-y-5">
-          <div className="unimath-panel-muted rounded-[1.75rem] p-5">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <p className="font-label text-xs text-muted-foreground">Daily quote</p>
-            </div>
-            <p className="mt-4 max-w-3xl font-serif text-3xl leading-tight tracking-[-0.04em] text-foreground sm:text-4xl">
-              {typedQuote}
-              <span className="ml-1 inline-block h-6 w-px animate-pulse bg-foreground/40 align-[-4px]" />
-            </p>
-          </div>
-
           <div className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-primary" />
             <p className="font-label text-xs text-muted-foreground">Study snapshot</p>

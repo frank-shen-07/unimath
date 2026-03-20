@@ -5,7 +5,6 @@ import {
   ReactFlow,
   Background,
   Controls,
-  MiniMap,
   useNodesState,
   useEdgesState,
   type Node,
@@ -49,6 +48,7 @@ interface TopicNodeData {
   masteryScore: number;
   heatColor: string;
   glowColor: string;
+  fillColor: string;
   [key: string]: unknown;
 }
 
@@ -60,11 +60,11 @@ interface SimulationNode extends SimulationNodeDatum {
 }
 
 const HEAT_TIERS = [
-  { label: "1-9", color: "#29543a", bg: "rgba(41,84,58,0.22)" },
-  { label: "10+", color: "#2f8f4e", bg: "rgba(47,143,78,0.18)" },
-  { label: "50+", color: "#53c26b", bg: "rgba(83,194,107,0.18)" },
-  { label: "100+", color: "#97ea59", bg: "rgba(151,234,89,0.18)" },
-  { label: "200+", color: "#d7ff6f", bg: "rgba(215,255,111,0.2)" },
+  { label: "1-9", color: "#d8b84f", bg: "rgba(216,184,79,0.18)" },
+  { label: "10+", color: "#c4a94b", bg: "rgba(196,169,75,0.24)" },
+  { label: "50+", color: "#93a248", bg: "rgba(147,162,72,0.3)" },
+  { label: "100+", color: "#4f7f3e", bg: "rgba(79,127,62,0.4)" },
+  { label: "200+", color: "#1f5a34", bg: "rgba(31,90,52,0.52)" },
 ] as const;
 
 function TopicNodeComponent({ data }: { data: TopicNodeData }) {
@@ -76,7 +76,7 @@ function TopicNodeComponent({ data }: { data: TopicNodeData }) {
     <div
       className="relative flex h-[156px] w-[156px] items-center justify-center rounded-full border text-center shadow-lg transition-all duration-200 hover:-translate-y-1"
       style={{
-        background: practiced ? `rgba(37,34,32,0.98)` : "rgba(31,28,25,0.96)",
+        background: practiced ? data.fillColor : "rgba(31,28,25,0.96)",
         borderColor: practiced ? `${data.heatColor}cc` : "rgba(148,163,184,0.18)",
         boxShadow: practiced
           ? `0 16px 34px rgba(2,6,23,0.46), 0 0 0 2px ${data.heatColor}22, 0 0 28px ${data.glowColor}28`
@@ -118,7 +118,7 @@ function TopicNodeComponent({ data }: { data: TopicNodeData }) {
 
 function PracticeHeatLegend() {
   return (
-    <div className="flex flex-wrap items-center justify-end gap-2">
+    <div className="flex min-w-max items-center gap-2 whitespace-nowrap">
       <div className="inline-flex items-center gap-2 px-1 py-1 text-sm text-foreground">
         <Sparkles className="h-4 w-4 text-primary" />
         <span className="font-medium">Practice heat guide</span>
@@ -133,7 +133,7 @@ function PracticeHeatLegend() {
             style={{
               backgroundColor: tier.bg,
               borderColor: tier.color,
-              boxShadow: `0 0 0 1px ${tier.color}22`,
+              boxShadow: `0 0 0 1px ${tier.color}33`,
             }}
           />
           <span className="font-medium text-foreground">{tier.label}</span>
@@ -201,7 +201,7 @@ export default function MapPage() {
       const userData = topicMap.get(t.name);
       const position = positioned.get(t.id) ?? { x: t.x, y: t.y };
       const practiceCount = userData?.practice_count || 0;
-      const { heatColor, glowColor } = getPracticeHeat(practiceCount);
+      const { heatColor, glowColor, fillColor } = getPracticeHeat(practiceCount);
 
       return {
         id: t.id,
@@ -215,6 +215,7 @@ export default function MapPage() {
           masteryScore: userData?.mastery_score || 0,
           heatColor,
           glowColor,
+          fillColor,
         },
       };
     });
@@ -278,13 +279,13 @@ export default function MapPage() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="px-6 py-4 border-b border-border/50 bg-background/80 backdrop-blur-xl flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 overflow-x-auto border-b border-border/50 bg-background/80 px-6 py-4 backdrop-blur-xl">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Map className="w-6 h-6 text-primary" /> Knowledge Map
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Your mathematical journey visualized. Practiced topics light up.
+            Your mathematical journey visualized.
           </p>
         </div>
         <PracticeHeatLegend />
@@ -306,12 +307,7 @@ export default function MapPage() {
           nodesDraggable
         >
           <Background gap={18} size={1} color="rgba(99,102,241,0.12)" />
-          <Controls className="!rounded-xl !border-border/50 !shadow-lg" />
-          <MiniMap
-            className="!rounded-xl !border-border/50 !shadow-lg"
-            maskColor="var(--background)"
-            nodeColor={(node) => ((node.data as TopicNodeData | undefined)?.heatColor ?? "rgba(71,85,105,0.7)")}
-          />
+          <Controls className="!rounded-xl !border-border/50 !shadow-lg [&_button]:!border-border/60 [&_button]:!bg-primary [&_button]:!text-black [&_button_svg]:!stroke-black [&_button_path]:!stroke-black" />
         </ReactFlow>
 
         <AnimatePresence>
@@ -387,19 +383,19 @@ export default function MapPage() {
 
 function getPracticeHeat(practiceCount: number) {
   if (practiceCount >= 200) {
-    return { heatColor: "#d7ff6f", glowColor: "#d7ff6f" };
+    return { heatColor: "#1f5a34", glowColor: "#3d8b57", fillColor: "rgba(31,90,52,0.56)" };
   }
   if (practiceCount >= 100) {
-    return { heatColor: "#97ea59", glowColor: "#97ea59" };
+    return { heatColor: "#4f7f3e", glowColor: "#79a562", fillColor: "rgba(79,127,62,0.42)" };
   }
   if (practiceCount >= 50) {
-    return { heatColor: "#53c26b", glowColor: "#53c26b" };
+    return { heatColor: "#93a248", glowColor: "#aebb58", fillColor: "rgba(147,162,72,0.34)" };
   }
   if (practiceCount >= 10) {
-    return { heatColor: "#2f8f4e", glowColor: "#2f8f4e" };
+    return { heatColor: "#c4a94b", glowColor: "#d9bf69", fillColor: "rgba(196,169,75,0.28)" };
   }
   if (practiceCount > 0) {
-    return { heatColor: "#29543a", glowColor: "#29543a" };
+    return { heatColor: "#d8b84f", glowColor: "#e3c96f", fillColor: "rgba(216,184,79,0.22)" };
   }
-  return { heatColor: "#475569", glowColor: "#475569" };
+  return { heatColor: "#475569", glowColor: "#475569", fillColor: "rgba(31,28,25,0.96)" };
 }

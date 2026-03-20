@@ -23,7 +23,7 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "UniMath - AI Math Tutor",
+  title: "UniMathMate - AI Math Tutor",
   description: "AI-powered math tutoring for university students",
 };
 

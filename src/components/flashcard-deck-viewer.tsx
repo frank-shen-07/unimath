@@ -56,7 +56,13 @@ export function FlashcardDeckViewer({ deckId }: { deckId: string }) {
   }, [deckId, supabase]);
 
   useEffect(() => {
-    void loadDeck();
+    const timeoutId = window.setTimeout(() => {
+      void loadDeck();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, [loadDeck]);
 
   useEffect(() => {

@@ -83,7 +83,7 @@
   --accent: #ece0d7;
   --accent-foreground: var(--surface-900);
   --destructive: var(--fail);
-  --border: rgb(26 22 20 / 0.1);
+  --border: rgb(122 114 110 / 0.16);
   --input: rgb(255 255 255 / 0.56);
   --ring: rgb(26 22 20 / 0.18);
   --chart-1: var(--violet);
@@ -98,7 +98,7 @@
   --sidebar-primary-foreground: var(--surface-0);
   --sidebar-accent: rgb(26 22 20 / 0.06);
   --sidebar-accent-foreground: var(--surface-900);
-  --sidebar-border: rgb(26 22 20 / 0.08);
+  --sidebar-border: rgb(122 114 110 / 0.14);
   --sidebar-ring: rgb(26 22 20 / 0.18);
 }
 
@@ -136,7 +136,7 @@
   --accent: #322f2c;
   --accent-foreground: var(--surface-900);
   --destructive: var(--fail);
-  --border: rgb(232 221 210 / 0.1);
+  --border: rgb(138 132 125 / 0.18);
   --input: rgb(37 34 32 / 0.88);
   --ring: rgb(232 216 204 / 0.28);
   --chart-1: var(--violet);
@@ -150,7 +150,7 @@
   --sidebar-primary-foreground: var(--accent-strong);
   --sidebar-accent: rgb(232 221 210 / 0.05);
   --sidebar-accent-foreground: var(--surface-900);
-  --sidebar-border: rgb(232 221 210 / 0.08);
+  --sidebar-border: rgb(138 132 125 / 0.16);
   --sidebar-ring: rgb(232 216 204 / 0.24);
 }
 

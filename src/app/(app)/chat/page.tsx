@@ -141,25 +141,6 @@ export default function ChatPage() {
               <Sparkles className="w-8 h-8 text-primary-foreground" />
             </div>
             <h2 className="mb-2 font-serif text-4xl leading-none tracking-[-0.04em] text-foreground">Ask me anything about math</h2>
-            <p className="text-muted-foreground max-w-md leading-relaxed">
-              I can help with calculus, linear algebra, differential equations, probability, and more. You can also attach an image of a problem.
-            </p>
-            <div className="flex flex-wrap gap-2 mt-6 justify-center max-w-lg">
-              {[
-                "Solve ∫ x²eˣ dx",
-                "Explain eigenvalues",
-                "What is the chain rule?",
-                "Taylor series of sin(x)",
-              ].map((suggestion) => (
-                <button
-                  key={suggestion}
-                  onClick={() => setInput(suggestion)}
-                  className="unimath-pill rounded-full px-4 py-2 text-sm text-muted-foreground transition-all hover:border-primary/30 hover:text-foreground"
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
           </div>
         ) : (
           <div className="mx-auto max-w-4xl space-y-7 p-5">
@@ -242,7 +223,7 @@ export default function ChatPage() {
             <Button
               variant="outline"
               size="icon"
-              className="unimath-input h-10 w-10 flex-shrink-0 rounded-xl"
+              className="unimath-input h-12 w-12 flex-shrink-0 rounded-xl"
               onClick={() => fileInputRef.current?.click()}
             >
               <ImagePlus className="w-[18px] h-[18px]" />
@@ -253,14 +234,14 @@ export default function ChatPage() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type your math question..."
-              className="unimath-input min-h-[44px] max-h-32 resize-none rounded-xl"
-              rows={1}
+              className="unimath-input min-h-[60px] max-h-40 resize-none rounded-xl px-4 py-4"
+              rows={2}
             />
             <Button
               onClick={handleSubmit}
               disabled={isLoading || (!input.trim() && !imageFile)}
               size="icon"
-              className="h-10 w-10 flex-shrink-0 rounded-xl"
+              className="h-12 w-12 flex-shrink-0 rounded-xl"
             >
               {isLoading ? (
                 <Loader2 className="w-[18px] h-[18px] animate-spin" />

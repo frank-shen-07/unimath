@@ -34,7 +34,7 @@ export function EditorialHeader({
 }: {
   eyebrow?: string;
   title: string;
-  description?: string;
+  description?: ReactNode;
   aside?: ReactNode;
 }) {
   return (
@@ -43,7 +43,7 @@ export function EditorialHeader({
       animate={{ opacity: 1, y: 0 }}
       className="unimath-panel relative overflow-hidden rounded-xl p-6 lg:p-8"
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/8 dark:bg-white/6" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-border/90" />
       <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1fr),auto]">
         <div className="space-y-3">
           {eyebrow ? (
@@ -56,9 +56,9 @@ export function EditorialHeader({
               {title}
             </h1>
             {description ? (
-              <p className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
+              <div className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
                 {description}
-              </p>
+              </div>
             ) : null}
           </div>
         </div>
@@ -82,7 +82,7 @@ export function EditorialPanel({
         className
       )}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/8 dark:bg-white/6" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-border/90" />
       <div className="relative">{children}</div>
     </div>
   );

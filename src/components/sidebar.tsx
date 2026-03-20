@@ -107,9 +107,8 @@ export function AppSidebar({ user }: { user: User }) {
         {!collapsed && (
           <div className="min-w-0">
             <span className="block font-serif text-3xl leading-none tracking-[-0.04em] text-foreground">
-              UniMath
+              UniMathMate
             </span>
-            <p className="font-label mt-1 text-[10px] text-muted-foreground">Study workspace</p>
           </div>
         )}
         {!collapsed && <div className="ml-auto w-6" />}
@@ -119,13 +118,13 @@ export function AppSidebar({ user }: { user: User }) {
         variant="ghost"
         size="icon"
         className={cn(
-          "unimath-panel absolute top-6 z-[200] h-9 w-9 rounded-sm text-muted-foreground shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:text-foreground",
+          "unimath-panel absolute top-5 z-[200] h-8 w-8 rounded-sm text-muted-foreground shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:text-foreground",
           collapsed ? "-right-4" : "-right-4"
         )}
         onClick={handleToggleSidebar}
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
-        {collapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+        {collapsed ? <PanelLeft className="h-3.5 w-3.5" /> : <PanelLeftClose className="h-3.5 w-3.5" />}
       </Button>
 
       <nav className="relative flex-1 space-y-1 px-3">
@@ -160,7 +159,7 @@ export function AppSidebar({ user }: { user: User }) {
         })}
       </nav>
 
-      <div className="relative space-y-1 p-3">
+      <div className="relative space-y-1 p-3 pb-5">
         <Separator className="mb-2 opacity-15" />
         <button
           onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}

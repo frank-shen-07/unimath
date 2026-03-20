@@ -244,7 +244,7 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
             <Button
               variant="outline"
               size="icon"
-              className="unimath-input h-10 w-10 flex-shrink-0 rounded-xl"
+              className="unimath-input h-12 w-12 flex-shrink-0 rounded-xl"
               onClick={() => fileInputRef.current?.click()}
             >
               <ImagePlus className="w-4 h-4" />
@@ -254,14 +254,14 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Continue the conversation..."
-              className="unimath-input min-h-[44px] max-h-32 resize-none rounded-xl"
-              rows={1}
+              className="unimath-input min-h-[60px] max-h-40 resize-none rounded-xl px-4 py-4"
+              rows={2}
             />
             <Button
               onClick={handleSubmit}
               disabled={isLoading || (!input.trim() && !imageFile)}
               size="icon"
-              className="h-10 w-10 flex-shrink-0 rounded-xl"
+              className="h-12 w-12 flex-shrink-0 rounded-xl"
             >
               {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </Button>

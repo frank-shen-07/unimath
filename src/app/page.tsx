@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Brain, Dumbbell, Layers, Map, MessageSquare, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpen, Dumbbell, Layers, Map, MessageSquare } from "lucide-react";
+import { LandingFlashcard } from "@/components/landing-flashcard";
 
 const features = [
   {
@@ -42,7 +43,7 @@ export default function LandingPage() {
             </div>
             <div>
               <p className="font-label text-[10px] text-muted-foreground">Study OS</p>
-              <span className="font-serif text-2xl leading-none tracking-[-0.04em]">UniMath</span>
+              <span className="font-serif text-2xl leading-none tracking-[-0.04em]">UniMathMate</span>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -66,10 +67,6 @@ export default function LandingPage() {
         <section className="px-6 pb-20 pt-32">
           <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.1fr,0.9fr] lg:items-center">
             <div className="max-w-3xl">
-              <div className="unimath-pill mb-8 inline-flex items-center gap-2 rounded-sm px-4 py-2 text-sm text-foreground/72">
-                <Sparkles className="h-4 w-4 text-primary" />
-                Powered by Gemini Flash AI
-              </div>
               <h1 className="font-serif text-6xl leading-none tracking-[-0.06em] sm:text-7xl lg:text-8xl">
                 Study university maths in one calm workspace.
               </h1>
@@ -108,25 +105,7 @@ export default function LandingPage() {
             <div className="relative">
               <div className="unimath-panel relative overflow-hidden rounded-xl p-5">
                 <div className="grid gap-4">
-                  <div className="unimath-panel-muted rounded-lg p-5">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-label text-[11px] text-muted-foreground">Flashcards</p>
-                        <h2 className="mt-2 font-serif text-4xl leading-none tracking-[-0.05em]">Flip to recall</h2>
-                      </div>
-                      <Layers className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div className="mt-5 [perspective:2000px]">
-                      <div className="unimath-panel-muted relative min-h-[250px] rounded-lg p-6">
-                        <p className="font-label text-[11px] text-muted-foreground">Front</p>
-                        <div className="flex min-h-[180px] items-center justify-center">
-                          <p className="max-w-md text-center font-serif text-3xl leading-tight tracking-[-0.04em] text-foreground">
-                            What does a positive definite matrix guarantee about $x^TAx$?
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <LandingFlashcard />
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="unimath-panel-muted rounded-lg p-5">
@@ -206,11 +185,7 @@ export default function LandingPage() {
 
       <footer className="border-t border-border/70 px-6 py-8">
         <div className="mx-auto flex max-w-7xl items-center justify-between text-sm text-muted-foreground">
-          <p>UniMath — AI Math Tutor for University Students</p>
-          <div className="flex items-center gap-2">
-            <Brain className="h-4 w-4" />
-            <p>Powered by Gemini Flash</p>
-          </div>
+          <p>UniMathMate — AI Math Tutor for University Students</p>
         </div>
       </footer>
     </div>
