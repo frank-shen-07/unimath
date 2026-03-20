@@ -210,7 +210,7 @@ export default function SolvePage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <MathRenderer content={solution} />
+              <MathRenderer content={solution} className="text-[15px]" />
             </CardContent>
           </Card>
         </motion.div>

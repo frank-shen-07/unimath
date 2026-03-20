@@ -179,7 +179,7 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto p-4 space-y-6">
+        <div className="mx-auto max-w-4xl p-5 space-y-7">
           <AnimatePresence mode="popLayout">
             {messages.map((msg, i) => (
               <motion.div
@@ -194,7 +194,7 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
                   </div>
                 )}
                 <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+                  className={`max-w-[88%] rounded-2xl px-5 py-4 ${
                     msg.role === "user"
                       ? "bg-primary text-primary-foreground rounded-br-md"
                       : "bg-card border border-border/50 rounded-bl-md shadow-sm"
@@ -204,9 +204,9 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
                     <img src={msg.imagePreview} alt="Uploaded" className="max-h-48 rounded-lg mb-2" />
                   )}
                   {msg.role === "assistant" ? (
-                    <MathRenderer content={msg.content} />
+                    <MathRenderer content={msg.content} className="text-[15px]" />
                   ) : (
-                    <p className="whitespace-pre-wrap text-sm">{msg.content}</p>
+                    <p className="whitespace-pre-wrap text-sm leading-7">{msg.content}</p>
                   )}
                 </div>
               </motion.div>

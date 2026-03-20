@@ -77,27 +77,7 @@ export default function MapPage() {
   const [selectedTopic, setSelectedTopic] = useState<{ name: string; category: string; practiceCount: number; masteryScore: number } | null>(null);
   const [userTopics, setUserTopics] = useState<TopicNode[]>([]);
 
-  useEffect(() => {
-    const load = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase
-          .from("topic_nodes")
-          .select("*")
-          .eq("user_id", user.id);
-        if (data) setUserTopics(data);
-      }
-      buildGraph(userTopics);
-    };
-    load();
-  }, []);
-
-  useEffect(() => {
-    buildGraph(userTopics);
-  }, [userTopics]);
-
-  const buildGraph = (topics: TopicNode[]) => {
+  const buildGraph = useCallback((topics: TopicNode[]) => {
     const topicMap = new globalThis.Map(topics.map((t) => [t.topic_name, t]));
 
     const flowNodes: Node[] = DEFAULT_TOPICS.map((t) => {
@@ -127,7 +107,31 @@ export default function MapPage() {
 
     setNodes(flowNodes);
     setEdges(flowEdges);
-  };
+  }, [setEdges, setNodes]);
+
+  useEffect(() => {
+    const load = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from("topic_nodes")
+          .select("*")
+          .eq("user_id", user.id);
+        if (data) {
+          setUserTopics(data);
+          buildGraph(data);
+          return;
+        }
+      }
+      buildGraph([]);
+    };
+    load();
+  }, [buildGraph]);
+
+  useEffect(() => {
+    buildGraph(userTopics);
+  }, [buildGraph, userTopics]);
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     const data = node.data as TopicNodeData;

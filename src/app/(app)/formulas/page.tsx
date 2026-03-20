@@ -3,15 +3,31 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MathRenderer } from "@/components/math-renderer";
 import { createClient } from "@/lib/supabase/client";
 import { PRACTICE_TOPICS } from "@/lib/topics";
-import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, Loader2, Plus, Trash2, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  BookOpen,
+  Loader2,
+  Plus,
+  Trash2,
+  Sparkles,
+  Download,
+  ChevronRight,
+} from "lucide-react";
 import type { FormulaSheet, FormulaSection } from "@/lib/types";
+import { TopicAutocomplete } from "@/components/topic-autocomplete";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function FormulasPage() {
   const [sheets, setSheets] = useState<FormulaSheet[]>([]);
@@ -19,6 +35,7 @@ export default function FormulasPage() {
   const [generating, setGenerating] = useState(false);
   const [topicInput, setTopicInput] = useState("");
   const [activeSheet, setActiveSheet] = useState<{ title: string; sections: FormulaSection[] } | null>(null);
+  const [selectedSheet, setSelectedSheet] = useState<FormulaSheet | null>(null);
 
   useEffect(() => {
     loadSheets();
@@ -86,6 +103,61 @@ export default function FormulasPage() {
     const supabase = createClient();
     await supabase.from("formula_sheets").delete().eq("id", id);
     setSheets(sheets.filter((s) => s.id !== id));
+    if (selectedSheet?.id === id) {
+      setSelectedSheet(null);
+    }
+  };
+
+  const downloadSheetPdf = async (title: string, sections: FormulaSection[]) => {
+    const { jsPDF } = await import("jspdf");
+    const pdf = new jsPDF({
+      unit: "pt",
+      format: "a4",
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 48;
+    const contentWidth = pageWidth - margin * 2;
+    let y = 60;
+
+    const addWrappedText = (
+      text: string,
+      fontSize = 11,
+      fontStyle: "normal" | "bold" = "normal",
+      gapAfter = 10
+    ) => {
+      pdf.setFont("helvetica", fontStyle);
+      pdf.setFontSize(fontSize);
+      const lines = pdf.splitTextToSize(text, contentWidth);
+
+      for (const line of lines) {
+        if (y > pageHeight - 60) {
+          pdf.addPage();
+          y = 60;
+        }
+        pdf.text(line, margin, y);
+        y += fontSize + 5;
+      }
+
+      y += gapAfter;
+    };
+
+    addWrappedText(title, 20, "bold", 16);
+
+    sections.forEach((section) => {
+      addWrappedText(section.heading, 15, "bold", 8);
+
+      section.formulas.forEach((formula) => {
+        addWrappedText(formula.name, 12, "bold", 4);
+        addWrappedText(formula.expression.replace(/\$/g, ""), 11, "normal", 4);
+        addWrappedText(formula.description, 10, "normal", 10);
+      });
+
+      y += 4;
+    });
+
+    pdf.save(`${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.pdf`);
   };
 
   return (
@@ -97,19 +169,15 @@ export default function FormulasPage() {
 
       <Card className="border-border/50">
         <CardContent className="p-6">
-          <div className="flex gap-2">
-            <Input
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <TopicAutocomplete
               value={topicInput}
-              onChange={(e) => setTopicInput(e.target.value)}
+              onChange={setTopicInput}
+              options={PRACTICE_TOPICS}
               placeholder="Enter a topic, e.g. 'Integration techniques' or 'Linear Algebra'"
-              className="rounded-xl border-border/50"
-              onKeyDown={(e) => { if (e.key === "Enter") handleGenerate(); }}
-              list="topics"
+              className="flex-1"
             />
-            <datalist id="topics">
-              {PRACTICE_TOPICS.map((t) => <option key={t} value={t} />)}
-            </datalist>
-            <Button onClick={handleGenerate} disabled={!topicInput.trim() || generating} className="rounded-xl px-6">
+            <Button onClick={handleGenerate} disabled={!topicInput.trim() || generating} className="rounded-xl px-6 sm:self-start">
               {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Sparkles className="w-4 h-4 mr-2" /> Generate</>}
             </Button>
           </div>
@@ -134,12 +202,12 @@ export default function FormulasPage() {
                   <h3 className="text-lg font-semibold mb-3">{section.heading}</h3>
                   <div className="space-y-3">
                     {section.formulas.map((f, j) => (
-                      <div key={j} className="p-3 rounded-xl bg-accent/30 border border-border/30">
+                      <div key={j} className="rounded-2xl border border-border/40 bg-accent/20 p-4">
                         <div className="flex items-start justify-between gap-2">
-                          <div>
+                          <div className="space-y-2">
                             <p className="font-medium text-sm">{f.name}</p>
-                            <MathRenderer content={f.expression} className="my-1" />
-                            <p className="text-sm text-muted-foreground">{f.description}</p>
+                            <MathRenderer content={f.expression} className="text-base" />
+                            <p className="text-sm leading-6 text-muted-foreground">{f.description}</p>
                           </div>
                         </div>
                       </div>
@@ -147,6 +215,16 @@ export default function FormulasPage() {
                   </div>
                 </div>
               ))}
+              <div className="flex justify-end">
+                <Button
+                  variant="outline"
+                  className="rounded-xl"
+                  onClick={() => downloadSheetPdf(activeSheet.title, activeSheet.sections)}
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Download PDF Notes Sheet
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
@@ -171,26 +249,98 @@ export default function FormulasPage() {
         ) : (
           <div className="space-y-3">
             {sheets.map((sheet) => (
-              <Card key={sheet.id} className="border-border/50">
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">{sheet.title}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="secondary" className="rounded-full text-xs">{sheet.topic}</Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(sheet.created_at).toLocaleDateString()}
-                      </span>
+              <Card key={sheet.id} className="border-border/50 transition-colors hover:border-primary/20">
+                <CardContent className="flex items-center justify-between gap-4 p-4">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSheet(sheet)}
+                    className="flex min-w-0 flex-1 items-center justify-between text-left"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate font-medium">{sheet.title}</p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <Badge variant="secondary" className="rounded-full text-xs">{sheet.topic}</Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(sheet.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
+                    <ChevronRight className="ml-3 h-4 w-4 flex-shrink-0 text-muted-foreground" />
+                  </button>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground"
+                      onClick={() => setSelectedSheet(sheet)}
+                    >
+                      <BookOpen className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground"
+                      onClick={() => downloadSheetPdf(sheet.title, sheet.formulas as FormulaSection[])}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={() => handleDelete(sheet.id)}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={() => handleDelete(sheet.id)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
                 </CardContent>
               </Card>
             ))}
           </div>
         )}
       </div>
+
+      <Dialog open={!!selectedSheet} onOpenChange={(open) => !open && setSelectedSheet(null)}>
+        <DialogContent className="max-h-[85vh] max-w-4xl overflow-hidden rounded-2xl border-border/50 bg-background p-0">
+          {selectedSheet && (
+            <>
+              <DialogHeader className="border-b border-border/50 px-6 py-5">
+                <DialogTitle className="flex items-center gap-2 text-xl">
+                  <BookOpen className="h-5 w-5 text-primary" />
+                  {selectedSheet.title}
+                </DialogTitle>
+                <DialogDescription className="flex items-center gap-2 pt-1">
+                  <Badge variant="secondary" className="rounded-full text-xs">{selectedSheet.topic}</Badge>
+                  <span>{new Date(selectedSheet.created_at).toLocaleDateString()}</span>
+                </DialogDescription>
+              </DialogHeader>
+              <div className="max-h-[60vh] overflow-y-auto px-6 py-5">
+                <div className="space-y-6">
+                  {(selectedSheet.formulas as FormulaSection[]).map((section, i) => (
+                    <div key={i}>
+                      <h3 className="mb-3 text-lg font-semibold">{section.heading}</h3>
+                      <div className="space-y-3">
+                        {section.formulas.map((formula, j) => (
+                          <div key={j} className="rounded-2xl border border-border/40 bg-accent/20 p-4">
+                            <p className="text-sm font-semibold">{formula.name}</p>
+                            <MathRenderer content={formula.expression} className="mt-2 text-base" />
+                            <p className="mt-2 text-sm leading-6 text-muted-foreground">{formula.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <DialogFooter className="border-t border-border/50 bg-background px-6 py-4">
+                <Button
+                  variant="outline"
+                  className="rounded-xl"
+                  onClick={() => downloadSheetPdf(selectedSheet.title, selectedSheet.formulas as FormulaSection[])}
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Download PDF Notes Sheet
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

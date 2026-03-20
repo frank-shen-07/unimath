@@ -13,6 +13,7 @@ import { PRACTICE_TOPICS } from "@/lib/topics";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dumbbell, Loader2, Check, X, ArrowRight, RotateCcw, Trophy } from "lucide-react";
 import type { GeneratedQuestion } from "@/lib/types";
+import { TopicAutocomplete } from "@/components/topic-autocomplete";
 
 type Phase = "setup" | "practice" | "results";
 
@@ -138,24 +139,20 @@ export default function PracticePage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Topic</label>
-                    <Select value={topic} onValueChange={(v) => setTopic(v ?? "")}>
-                      <SelectTrigger className="rounded-xl border-border/50">
-                        <SelectValue placeholder="Select a topic" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PRACTICE_TOPICS.map((t) => (
-                          <SelectItem key={t} value={t}>{t}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <TopicAutocomplete
+                      value={topic}
+                      onChange={setTopic}
+                      options={PRACTICE_TOPICS}
+                      placeholder="Start typing a topic..."
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Difficulty</label>
                     <Select value={difficulty} onValueChange={(v) => setDifficulty(v ?? "")}>
-                      <SelectTrigger className="rounded-xl border-border/50">
+                      <SelectTrigger className="h-11 w-full rounded-xl border-border/50 bg-card">
                         <SelectValue placeholder="Select difficulty" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="rounded-xl border-border/60 p-1">
                         <SelectItem value="easy">Easy</SelectItem>
                         <SelectItem value="medium">Medium</SelectItem>
                         <SelectItem value="hard">Hard</SelectItem>
@@ -199,7 +196,7 @@ export default function PracticePage() {
                 <CardTitle className="text-lg">Question {currentIndex + 1}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <MathRenderer content={currentQuestion.question} />
+                <MathRenderer content={currentQuestion.question} className="text-base" />
 
                 {!showSolution ? (
                   <div className="space-y-3">
@@ -226,11 +223,11 @@ export default function PracticePage() {
                   <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                     <div className="p-4 rounded-xl bg-accent/50 border border-border/50">
                       <p className="text-sm font-medium mb-2">Correct Answer:</p>
-                      <MathRenderer content={currentQuestion.correctAnswer} />
+                      <MathRenderer content={currentQuestion.correctAnswer} className="text-base" />
                     </div>
                     <div className="p-4 rounded-xl bg-card border border-border/50">
                       <p className="text-sm font-medium mb-2">Explanation:</p>
-                      <MathRenderer content={currentQuestion.explanation} />
+                      <MathRenderer content={currentQuestion.explanation} className="text-base" />
                     </div>
                     <Button onClick={handleNext} className="w-full rounded-xl">
                       {currentIndex < questions.length - 1 ? (

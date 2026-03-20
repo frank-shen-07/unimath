@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -40,12 +40,9 @@ const navItems = [
 export function AppSidebar({ user }: { user: User }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const supabase = createClient();
-
-  useEffect(() => setMounted(true), []);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -118,7 +115,11 @@ export function AppSidebar({ user }: { user: User }) {
         >
           <Sun className="h-[18px] w-[18px] flex-shrink-0 dark:hidden" />
           <Moon className="h-[18px] w-[18px] flex-shrink-0 hidden dark:block" />
-          {!collapsed && <span>{mounted ? (resolvedTheme === "dark" ? "Light mode" : "Dark mode") : "Toggle theme"}</span>}
+          {!collapsed && (
+            <span suppressHydrationWarning>
+              {resolvedTheme === "dark" ? "Light mode" : "Dark mode"}
+            </span>
+          )}
         </button>
 
         <Link
