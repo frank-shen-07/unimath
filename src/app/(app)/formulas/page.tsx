@@ -109,7 +109,7 @@ export default function FormulasPage() {
   };
 
   const downloadSheetPdf = async (title: string, sections: FormulaSection[]) => {
-    const { jsPDF } = await import("jspdf");
+    const { jsPDF } = await import("jspdf/dist/jspdf.umd.min.js");
     const pdf = new jsPDF({
       unit: "pt",
       format: "a4",
