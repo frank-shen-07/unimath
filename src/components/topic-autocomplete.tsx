@@ -3,6 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  CATEGORY_TO_TOPICS,
+  DEFAULT_TOPICS,
+  resolveTopicScope,
+} from "@/lib/topics";
 
 interface TopicAutocompleteProps {
   value: string;
@@ -42,9 +47,30 @@ export function TopicAutocomplete({
     const trimmed = query.trim().toLowerCase();
     if (!trimmed) return [];
 
-    return options
-      .filter((option) => option.toLowerCase().includes(trimmed))
-      .slice(0, 8);
+    const normalizedQuery = normalizeSearch(trimmed);
+    const directMatches = options.filter((option) =>
+      normalizeSearch(option).includes(normalizedQuery)
+    );
+
+    const categoryMatches = Object.entries(CATEGORY_TO_TOPICS)
+      .filter(([category]) =>
+        normalizeSearch(category).includes(normalizedQuery)
+      )
+      .flatMap(([, categoryTopics]) => categoryTopics);
+
+    const mergedMatches = Array.from(
+      new Set([...directMatches, ...categoryMatches])
+    );
+
+    return mergedMatches
+      .sort((a, b) => {
+        const aStarts = normalizeSearch(a).startsWith(normalizedQuery);
+        const bStarts = normalizeSearch(b).startsWith(normalizedQuery);
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+        return a.localeCompare(b);
+      })
+      .slice(0, 10);
   }, [options, query]);
 
   const showDropdown = focused && query.trim().length > 0 && filteredOptions.length > 0;
@@ -81,7 +107,14 @@ export function TopicAutocomplete({
                 }}
                 className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-colors hover:bg-accent"
               >
-                <span className="truncate">{option}</span>
+                <div className="min-w-0">
+                  <div className="truncate">{option}</div>
+                  <div className="truncate text-xs text-muted-foreground">
+                    {resolveTopicScope(option).isCategory
+                      ? "Category"
+                      : DEFAULT_TOPICS.find((topic) => topic.name === option)?.category}
+                  </div>
+                </div>
                 {isSelected && <Check className="h-4 w-4 text-primary" />}
               </button>
             );
@@ -90,4 +123,14 @@ export function TopicAutocomplete({
       )}
     </div>
   );
+}
+
+function normalizeSearch(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/maths/g, "math")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }

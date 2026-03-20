@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MathRenderer } from "@/components/math-renderer";
+import { EditorialHeader, EditorialPage } from "@/components/editorial";
 import { motion } from "framer-motion";
 import { Camera, Upload, X, Loader2, Sparkles, ImagePlus } from "lucide-react";
 
@@ -93,17 +95,13 @@ export default function SolvePage() {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-1"
-      >
-        <h1 className="text-3xl font-bold">Photo Solve</h1>
-        <p className="text-muted-foreground text-lg">
-          Upload or capture a photo of a math problem to get a step-by-step solution.
-        </p>
-      </motion.div>
+    <EditorialPage className="max-w-none">
+      <div className="mx-auto w-full max-w-4xl space-y-6">
+        <EditorialHeader
+          eyebrow="Photo Solve"
+          title="Turn images into worked solutions"
+          description="Upload or capture a photo of a problem and UniMath will identify it, solve it step by step, and render the maths cleanly."
+        />
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -150,10 +148,13 @@ export default function SolvePage() {
             ) : (
               <div className="space-y-4">
                 <div className="relative inline-block">
-                  <img
+                  <Image
                     src={imagePreview}
                     alt="Problem"
-                    className="max-h-80 rounded-xl border border-border shadow-sm"
+                    width={1200}
+                    height={900}
+                    unoptimized
+                    className="max-h-80 w-auto rounded-xl border border-border shadow-sm"
                   />
                   <button
                     onClick={clearImage}
@@ -215,6 +216,7 @@ export default function SolvePage() {
           </Card>
         </motion.div>
       )}
-    </div>
+      </div>
+    </EditorialPage>
   );
 }

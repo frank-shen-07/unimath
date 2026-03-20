@@ -64,6 +64,38 @@ export interface Formula {
   description: string;
 }
 
+export interface FlashcardDeck {
+  id: string;
+  user_id: string;
+  title: string;
+  topic: string | null;
+  source_text: string | null;
+  card_count: number;
+  studied_count: number;
+  known_count: number;
+  unknown_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Flashcard {
+  id: string;
+  deck_id: string;
+  front: string;
+  back: string;
+  sort_order: number;
+  created_at: string;
+}
+
+export interface FlashcardReview {
+  id: string;
+  user_id: string;
+  deck_id: string;
+  flashcard_id: string;
+  result: "known" | "unknown";
+  created_at: string;
+}
+
 export interface TopicNode {
   id: string;
   user_id: string;
@@ -87,4 +119,9 @@ export interface GeneratedQuestion {
   question: string;
   correctAnswer: string;
   explanation: string;
+}
+
+export interface GeneratedFlashcard {
+  front: string;
+  back: string;
 }

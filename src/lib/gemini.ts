@@ -150,11 +150,53 @@ Return as JSON:
   return JSON.parse(response.text ?? "{}");
 }
 
+export async function generateFlashcards(input: {
+  topic?: string;
+  notes?: string;
+  count?: number;
+}) {
+  const ai = getAI();
+  const count = input.count ?? 10;
+  const prompt = `Create ${count} high-quality university study flashcards.
+
+Context:
+- Topic or scope: ${input.topic ?? "General university mathematics"}
+- Notes: ${input.notes?.trim() || "No notes provided. Infer the most useful core concepts from the topic."}
+
+Requirements:
+- Make each flashcard concise, useful, and study-worthy.
+- Front side should be a direct question, definition cue, theorem cue, method cue, or concept prompt.
+- Back side should be accurate, clear, and can include LaTeX using $...$ or $$...$$ where helpful.
+- Cover a good spread of concepts instead of repeating the same idea.
+- If the topic is broad, include representative subtopics.
+
+Return JSON in this exact format:
+{
+  "title": "...",
+  "flashcards": [
+    {
+      "front": "...",
+      "back": "..."
+    }
+  ]
+}`;
+
+  const response = await ai.models.generateContent({
+    model: MODEL,
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    config: {
+      responseMimeType: "application/json",
+    },
+  });
+
+  return JSON.parse(response.text ?? "{}");
+}
+
 export async function classifyTopic(question: string): Promise<string> {
   const ai = getAI();
   const prompt = `Classify this math question into exactly one of these university math topic names. Return ONLY the topic name, nothing else.
 
-Topics: Limits, Derivatives, Integration, Multivariable Calculus, Series and Sequences, Vectors, Matrices, Eigenvalues and Eigenvectors, Linear Transformations, Vector Spaces, First-Order ODEs, Second-Order ODEs, Laplace Transforms, Probability, Statistics, Combinatorics, Graph Theory, Number Theory, Logic and Proofs, Sets and Functions, Real Analysis, Complex Analysis, Abstract Algebra, Topology, Numerical Methods, Optimization, Fourier Analysis, Partial Differential Equations
+Topics: Sets and Functions, Logic and Proofs, Number Theory, Graph Theory, Limits, Derivatives, Integration, Series and Sequences, Multivariable Calculus, Vectors, Matrices, Vector Spaces, Linear Transformations, Eigenvalues and Eigenvectors, Combinatorics, Probability, Statistics, First-Order ODEs, Second-Order ODEs, Laplace Transforms, Partial Differential Equations, Numerical Methods, Optimization, Fourier Analysis, Real Analysis, Complex Analysis, Measure Theory, Groups, Rings and Fields, Modules and Representations, Point-Set Topology, Algebraic Topology, Differential Topology
 
 Question: ${question}`;
 

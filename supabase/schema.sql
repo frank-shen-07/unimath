@@ -121,6 +121,60 @@ alter table public.formula_sheets enable row level security;
 create policy "Users can manage own formula sheets" on public.formula_sheets
   for all using (auth.uid() = user_id);
 
+-- Flashcard decks
+create table if not exists public.flashcard_decks (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users on delete cascade not null,
+  title text not null,
+  topic text,
+  source_text text,
+  card_count int not null default 0,
+  studied_count int not null default 0,
+  known_count int not null default 0,
+  unknown_count int not null default 0,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+alter table public.flashcard_decks enable row level security;
+
+create policy "Users can manage own flashcard decks" on public.flashcard_decks
+  for all using (auth.uid() = user_id);
+
+-- Flashcards
+create table if not exists public.flashcards (
+  id uuid default gen_random_uuid() primary key,
+  deck_id uuid references public.flashcard_decks on delete cascade not null,
+  front text not null,
+  back text not null,
+  sort_order int not null default 0,
+  created_at timestamptz default now()
+);
+
+alter table public.flashcards enable row level security;
+
+create policy "Users can manage flashcards in own decks" on public.flashcards
+  for all using (
+    deck_id in (
+      select id from public.flashcard_decks where user_id = auth.uid()
+    )
+  );
+
+-- Flashcard review history
+create table if not exists public.flashcard_reviews (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users on delete cascade not null,
+  deck_id uuid references public.flashcard_decks on delete cascade not null,
+  flashcard_id uuid references public.flashcards on delete cascade not null,
+  result text not null check (result in ('known', 'unknown')),
+  created_at timestamptz default now()
+);
+
+alter table public.flashcard_reviews enable row level security;
+
+create policy "Users can manage own flashcard reviews" on public.flashcard_reviews
+  for all using (auth.uid() = user_id);
+
 -- Topic nodes (for knowledge map)
 create table if not exists public.topic_nodes (
   id uuid default gen_random_uuid() primary key,
@@ -159,4 +213,7 @@ create index if not exists idx_conversations_updated_at on public.conversations(
 create index if not exists idx_messages_conversation_id on public.messages(conversation_id);
 create index if not exists idx_practice_sessions_user_id on public.practice_sessions(user_id);
 create index if not exists idx_formula_sheets_user_id on public.formula_sheets(user_id);
+create index if not exists idx_flashcard_decks_user_id on public.flashcard_decks(user_id);
+create index if not exists idx_flashcards_deck_id on public.flashcards(deck_id);
+create index if not exists idx_flashcard_reviews_deck_id on public.flashcard_reviews(deck_id);
 create index if not exists idx_topic_nodes_user_id on public.topic_nodes(user_id);

@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { MathRenderer } from "@/components/math-renderer";
 import { createClient } from "@/lib/supabase/client";
-import { PRACTICE_TOPICS } from "@/lib/topics";
+import { PRACTICE_TOPICS, resolveTopicScope } from "@/lib/topics";
+import { EditorialHeader, EditorialPage } from "@/components/editorial";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dumbbell, Loader2, Check, X, ArrowRight, RotateCcw, Trophy } from "lucide-react";
 import type { GeneratedQuestion } from "@/lib/types";
@@ -36,15 +37,23 @@ export default function PracticePage() {
   const [results, setResults] = useState<boolean[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
+  const [activeTopicLabel, setActiveTopicLabel] = useState("");
 
   const handleGenerate = async () => {
     if (!topic || !difficulty) return;
+    const resolvedScope = resolveTopicScope(topic);
+    setTopic(resolvedScope.label);
+    setActiveTopicLabel(resolvedScope.label);
     setIsLoading(true);
     try {
       const res = await fetch("/api/practice", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic, difficulty, count: 5 }),
+        body: JSON.stringify({
+          topic: resolvedScope.promptTopic,
+          difficulty,
+          count: 5,
+        }),
       });
       const data = await res.json();
       if (data.questions) {
@@ -98,7 +107,7 @@ export default function PracticePage() {
       const correct = results.filter(Boolean).length;
       await supabase.from("practice_sessions").insert({
         user_id: user.id,
-        topic,
+        topic: activeTopicLabel || topic,
         difficulty,
         total_questions: questions.length,
         correct_answers: correct,
@@ -113,17 +122,20 @@ export default function PracticePage() {
     setResults([]);
     setUserAnswer("");
     setShowSolution(false);
+    setActiveTopicLabel("");
   };
 
   const currentQuestion = questions[currentIndex];
   const correctCount = results.filter(Boolean).length;
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-1">
-        <h1 className="text-3xl font-bold">Practice Problems</h1>
-        <p className="text-muted-foreground text-lg">Generate and solve problems tailored to your level.</p>
-      </motion.div>
+    <EditorialPage className="max-w-none">
+      <div className="mx-auto w-full max-w-4xl space-y-6">
+        <EditorialHeader
+          eyebrow="Practice"
+          title="Practice problems"
+          description="Generate targeted questions by topic and difficulty, then step through solutions in the redesigned workspace."
+        />
 
       <AnimatePresence mode="wait">
         {phase === "setup" && (
@@ -176,7 +188,7 @@ export default function PracticePage() {
           <motion.div key="practice" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Badge variant="secondary" className="rounded-full">{topic}</Badge>
+                <Badge variant="secondary" className="rounded-full">{activeTopicLabel || topic}</Badge>
                 <Badge variant="outline" className="rounded-full capitalize">{difficulty}</Badge>
               </div>
               <span className="text-sm font-medium text-muted-foreground">
@@ -252,7 +264,7 @@ export default function PracticePage() {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold">Practice Complete!</h2>
-                  <p className="text-muted-foreground mt-1">{topic} - {difficulty}</p>
+                  <p className="text-muted-foreground mt-1">{activeTopicLabel || topic} - {difficulty}</p>
                 </div>
                 <div className="flex items-center justify-center gap-8">
                   <div className="text-center">
@@ -290,6 +302,7 @@ export default function PracticePage() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+      </div>
+    </EditorialPage>
   );
 }

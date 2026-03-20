@@ -61,17 +61,19 @@ export async function POST(request: NextRequest) {
 
 function getCategoryForTopic(topic: string): string {
   const categoryMap: Record<string, string[]> = {
-    Foundations: ["Sets and Functions", "Logic and Proofs", "Number Theory"],
-    Calculus: ["Limits", "Derivatives", "Integration", "Multivariable Calculus", "Series and Sequences"],
+    "Discrete Maths": ["Sets and Functions", "Logic and Proofs", "Number Theory", "Graph Theory"],
+    "Basic Calculus": ["Limits", "Derivatives", "Integration", "Multivariable Calculus", "Series and Sequences"],
     "Linear Algebra": ["Vectors", "Matrices", "Eigenvalues and Eigenvectors", "Linear Transformations", "Vector Spaces"],
     "Differential Equations": ["First-Order ODEs", "Second-Order ODEs", "Laplace Transforms", "Partial Differential Equations"],
-    "Probability & Statistics": ["Probability", "Statistics", "Combinatorics"],
-    "Discrete Math": ["Graph Theory"],
-    Advanced: ["Real Analysis", "Complex Analysis", "Abstract Algebra", "Topology", "Numerical Methods", "Optimization", "Fourier Analysis"],
+    "Probability and Statistics": ["Probability", "Statistics", "Combinatorics"],
+    "Applied Maths": ["Numerical Methods", "Optimization", "Fourier Analysis"],
+    Analysis: ["Real Analysis", "Complex Analysis", "Measure Theory"],
+    "Abstract Algebra": ["Groups", "Rings and Fields", "Modules and Representations"],
+    Topology: ["Point-Set Topology", "Algebraic Topology", "Differential Topology"],
   };
 
   for (const [category, topics] of Object.entries(categoryMap)) {
     if (topics.includes(topic)) return category;
   }
-  return "Foundations";
+  return "Basic Calculus";
 }

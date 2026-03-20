@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MathRenderer } from "@/components/math-renderer";
 import { createClient } from "@/lib/supabase/client";
-import { PRACTICE_TOPICS } from "@/lib/topics";
+import { PRACTICE_TOPICS, resolveTopicScope } from "@/lib/topics";
+import { EditorialHeader, EditorialPage } from "@/components/editorial";
 import { motion } from "framer-motion";
 import {
   BookOpen,
@@ -36,6 +37,7 @@ export default function FormulasPage() {
   const [topicInput, setTopicInput] = useState("");
   const [activeSheet, setActiveSheet] = useState<{ title: string; sections: FormulaSection[] } | null>(null);
   const [selectedSheet, setSelectedSheet] = useState<FormulaSheet | null>(null);
+  const [activeScopeLabel, setActiveScopeLabel] = useState("");
 
   useEffect(() => {
     loadSheets();
@@ -56,13 +58,16 @@ export default function FormulasPage() {
 
   const handleGenerate = async () => {
     if (!topicInput.trim()) return;
+    const resolvedScope = resolveTopicScope(topicInput);
     setGenerating(true);
     setActiveSheet(null);
+    setActiveScopeLabel(resolvedScope.label);
+    setTopicInput(resolvedScope.label);
     try {
       const res = await fetch("/api/formulas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic: topicInput }),
+        body: JSON.stringify({ topic: resolvedScope.promptTopic }),
       });
       const data = await res.json();
       if (data.title && data.sections) {
@@ -86,7 +91,7 @@ export default function FormulasPage() {
       .insert({
         user_id: user.id,
         title: activeSheet.title,
-        topic: topicInput,
+        topic: activeScopeLabel || topicInput,
         formulas: activeSheet.sections,
       })
       .select()
@@ -95,6 +100,7 @@ export default function FormulasPage() {
     if (data) {
       setSheets([data, ...sheets]);
       setActiveSheet(null);
+      setActiveScopeLabel("");
       setTopicInput("");
     }
   };
@@ -161,11 +167,13 @@ export default function FormulasPage() {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-1">
-        <h1 className="text-3xl font-bold">Formula Sheets</h1>
-        <p className="text-muted-foreground text-lg">Generate and save formula sheets by topic.</p>
-      </motion.div>
+    <EditorialPage className="max-w-none">
+      <div className="mx-auto w-full max-w-4xl space-y-6">
+        <EditorialHeader
+          eyebrow="Formula Sheets"
+          title="Build elegant note sheets"
+          description="Generate formula collections, save them, reopen them, and export them as PDFs from the darker editorial layout."
+        />
 
       <Card className="border-border/50">
         <CardContent className="p-6">
@@ -197,6 +205,13 @@ export default function FormulasPage() {
               </Button>
             </CardHeader>
             <CardContent className="space-y-6">
+              {activeScopeLabel && (
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="rounded-full">
+                    {activeScopeLabel}
+                  </Badge>
+                </div>
+              )}
               {activeSheet.sections.map((section, i) => (
                 <div key={i}>
                   <h3 className="text-lg font-semibold mb-3">{section.heading}</h3>
@@ -341,6 +356,7 @@ export default function FormulasPage() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </EditorialPage>
   );
 }
