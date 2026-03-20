@@ -59,6 +59,14 @@ interface SimulationNode extends SimulationNodeDatum {
   y: number;
 }
 
+const HEAT_TIERS = [
+  { label: "1-9", color: "#29543a", bg: "rgba(41,84,58,0.22)" },
+  { label: "10+", color: "#2f8f4e", bg: "rgba(47,143,78,0.18)" },
+  { label: "50+", color: "#53c26b", bg: "rgba(83,194,107,0.18)" },
+  { label: "100+", color: "#97ea59", bg: "rgba(151,234,89,0.18)" },
+  { label: "200+", color: "#d7ff6f", bg: "rgba(215,255,111,0.2)" },
+] as const;
+
 function TopicNodeComponent({ data }: { data: TopicNodeData }) {
   const practiced = data.practiceCount > 0;
   const colors =
@@ -66,44 +74,84 @@ function TopicNodeComponent({ data }: { data: TopicNodeData }) {
 
   return (
     <div
-      className="min-w-[170px] rounded-2xl border px-4 py-3 text-left shadow-lg backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5"
+      className="relative flex h-[156px] w-[156px] items-center justify-center rounded-full border text-center shadow-lg transition-all duration-200 hover:-translate-y-1"
       style={{
         background: practiced
-          ? `linear-gradient(180deg, rgba(15,23,42,0.96), ${data.heatColor}22)`
-          : "rgba(15,23,42,0.88)",
-        borderColor: practiced ? `${data.heatColor}aa` : "rgba(148,163,184,0.16)",
+          ? `radial-gradient(circle at 50% 35%, rgba(255,255,255,0.05), transparent 48%), linear-gradient(180deg, rgba(11,15,18,0.98), ${data.heatColor}20)`
+          : "linear-gradient(180deg, rgba(11,15,18,0.98), rgba(15,23,42,0.9))",
+        borderColor: practiced ? `${data.heatColor}cc` : "rgba(148,163,184,0.18)",
         boxShadow: practiced
-          ? `0 10px 24px rgba(2,6,23,0.42), 0 0 0 1px ${data.heatColor}22, 0 0 22px ${data.glowColor}25`
-          : "0 10px 24px rgba(2,6,23,0.35)",
+          ? `0 16px 34px rgba(2,6,23,0.46), 0 0 0 2px ${data.heatColor}22, 0 0 28px ${data.glowColor}28`
+          : "0 14px 32px rgba(2,6,23,0.38)",
       }}
     >
-      <Handle type="target" position={Position.Left} className="!h-2 !w-2 !border-0 !bg-primary/80" />
-      <div className="mb-2 flex items-center justify-between gap-2">
+      <Handle type="target" position={Position.Left} className="!h-2.5 !w-2.5 !border-0 !bg-primary/80" />
+      <div className="flex h-full w-full flex-col items-center justify-center gap-2 px-5 py-5">
         <span
           className={`rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] ${colors.bg} ${colors.border} ${colors.text}`}
         >
           {data.category}
         </span>
-        {practiced && (
-          <span className="text-[10px] font-medium text-emerald-300">
-            {data.practiceCount} solved
+        <p className="line-clamp-3 text-sm font-semibold leading-5 text-slate-100">
+          {data.label}
+        </p>
+        <div className="flex flex-col items-center gap-1">
+          <span
+            className="text-[11px] font-medium"
+            style={{ color: practiced ? data.heatColor : "rgba(148,163,184,0.72)" }}
+          >
+            {practiced ? `${data.practiceCount} solved` : "Not practiced"}
           </span>
-        )}
+          <div className="h-1.5 w-16 overflow-hidden rounded-full bg-white/6">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${Math.max(10, Math.min(100, (data.practiceCount / 200) * 100))}%`,
+                background: practiced ? data.heatColor : "rgba(100,116,139,0.35)",
+              }}
+            />
+          </div>
+        </div>
       </div>
-      <p className="text-sm font-semibold leading-5 text-slate-100">
-        {data.label}
-      </p>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/5">
-        <div
-          className="h-full rounded-full transition-all"
-          style={{
-            width: `${Math.max(8, Math.min(100, (data.practiceCount / 200) * 100))}%`,
-            background: practiced ? data.heatColor : "rgba(100,116,139,0.35)",
-          }}
-        />
-      </div>
-      <Handle type="source" position={Position.Right} className="!h-2 !w-2 !border-0 !bg-primary/80" />
+      <Handle type="source" position={Position.Right} className="!h-2.5 !w-2.5 !border-0 !bg-primary/80" />
     </div>
+  );
+}
+
+function PracticeHeatLegend() {
+  return (
+    <Card className="w-64 border-border/50 bg-background/92 shadow-xl">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Sparkles className="h-4 w-4 text-primary" />
+          Practice heat guide
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {HEAT_TIERS.map((tier) => (
+          <div
+            key={tier.label}
+            className="flex items-center justify-between gap-3 rounded-xl border border-white/6 bg-black/20 px-3 py-2.5"
+          >
+            <div className="flex items-center gap-3">
+              <span
+                className="h-4 w-4 rounded-full border"
+                style={{
+                  backgroundColor: tier.bg,
+                  borderColor: tier.color,
+                  boxShadow: `0 0 0 1px ${tier.color}22, 0 0 12px ${tier.color}22`,
+                }}
+              />
+              <span className="text-sm font-medium text-foreground">{tier.label}</span>
+            </div>
+            <span className="text-xs text-muted-foreground">questions</span>
+          </div>
+        ))}
+        <p className="text-xs leading-5 text-muted-foreground">
+          Higher practice counts use brighter rings and fills so strong topics stand out at a glance.
+        </p>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -136,23 +184,23 @@ export default function MapPage() {
         "link",
         forceLink(simulationLinks)
           .id((node) => (node as SimulationNode).id)
-          .distance(110)
-          .strength(0.2)
+          .distance(175)
+          .strength(0.14)
       )
-      .force("charge", forceManyBody().strength(-230))
-      .force("collide", forceCollide(82))
+      .force("charge", forceManyBody().strength(-520))
+      .force("collide", forceCollide(110))
       .force(
         "x",
-        forceX((node: SimulationNode) => CATEGORY_CENTERS[node.category]?.x ?? 0).strength(0.18)
+        forceX((node: SimulationNode) => (CATEGORY_CENTERS[node.category]?.x ?? 0) * 1.35).strength(0.14)
       )
       .force(
         "y",
-        forceY((node: SimulationNode) => CATEGORY_CENTERS[node.category]?.y ?? 0).strength(0.18)
+        forceY((node: SimulationNode) => (CATEGORY_CENTERS[node.category]?.y ?? 0) * 1.35).strength(0.14)
       )
-      .force("center", forceCenter(40, 80))
+      .force("center", forceCenter(70, 100))
       .stop();
 
-    for (let i = 0; i < 220; i += 1) {
+    for (let i = 0; i < 320; i += 1) {
       simulation.tick();
     }
 
@@ -279,8 +327,8 @@ export default function MapPage() {
           onNodeClick={onNodeClick}
           nodeTypes={nodeTypes}
           fitView
-          fitViewOptions={{ padding: 0.16 }}
-          minZoom={0.3}
+          fitViewOptions={{ padding: 0.24 }}
+          minZoom={0.22}
           maxZoom={1.5}
           proOptions={{ hideAttribution: true }}
           nodesDraggable
@@ -293,6 +341,14 @@ export default function MapPage() {
             nodeColor={(node) => ((node.data as TopicNodeData | undefined)?.heatColor ?? "rgba(71,85,105,0.7)")}
           />
         </ReactFlow>
+
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="absolute left-4 top-4 z-10"
+        >
+          <PracticeHeatLegend />
+        </motion.div>
 
         <AnimatePresence>
           {selectedTopic && (
@@ -355,30 +411,6 @@ export default function MapPage() {
                       <Dumbbell className="w-4 h-4 mr-2" /> Practice This Topic
                     </Button>
                   </Link>
-                  <div className="rounded-xl border border-border/50 bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-                    <div className="mb-2 flex items-center gap-2 font-medium text-foreground">
-                      <Sparkles className="h-3.5 w-3.5 text-primary" />
-                      Practice heat guide
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {[10, 50, 100, 200].map((count) => {
-                        const heat = getPracticeHeat(count);
-                        return (
-                          <span
-                            key={count}
-                            className="rounded-full px-2 py-1"
-                            style={{
-                              backgroundColor: `${heat.heatColor}22`,
-                              border: `1px solid ${heat.heatColor}88`,
-                              color: heat.heatColor,
-                            }}
-                          >
-                            {count}+
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             </motion.div>
@@ -391,19 +423,19 @@ export default function MapPage() {
 
 function getPracticeHeat(practiceCount: number) {
   if (practiceCount >= 200) {
-    return { heatColor: "#39d353", glowColor: "#39d353" };
+    return { heatColor: "#d7ff6f", glowColor: "#d7ff6f" };
   }
   if (practiceCount >= 100) {
-    return { heatColor: "#2ea043", glowColor: "#2ea043" };
+    return { heatColor: "#97ea59", glowColor: "#97ea59" };
   }
   if (practiceCount >= 50) {
-    return { heatColor: "#26a641", glowColor: "#26a641" };
+    return { heatColor: "#53c26b", glowColor: "#53c26b" };
   }
   if (practiceCount >= 10) {
-    return { heatColor: "#3fb950", glowColor: "#3fb950" };
+    return { heatColor: "#2f8f4e", glowColor: "#2f8f4e" };
   }
   if (practiceCount > 0) {
-    return { heatColor: "#1f6f43", glowColor: "#1f6f43" };
+    return { heatColor: "#29543a", glowColor: "#29543a" };
   }
   return { heatColor: "#475569", glowColor: "#475569" };
 }

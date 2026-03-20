@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { MATH_QUOTES } from "@/lib/math-quotes";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -46,6 +47,8 @@ export function AppSidebar({ user }: { user: User }) {
   const [collapsed, setCollapsed] = useState(false);
   const [ready, setReady] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [quoteIndex, setQuoteIndex] = useState(0);
+  const [typedQuote, setTypedQuote] = useState("");
   const supabase = createClient();
 
   useEffect(() => {
@@ -54,7 +57,38 @@ export function AppSidebar({ user }: { user: User }) {
       setCollapsed(true);
     }
     setReady(true);
+    setQuoteIndex(Math.floor(Math.random() * MATH_QUOTES.length));
   }, []);
+
+  useEffect(() => {
+    if (collapsed) {
+      return;
+    }
+
+    const fullQuote = MATH_QUOTES[quoteIndex] ?? "";
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    setTypedQuote("");
+
+    const typeNext = (index: number) => {
+      if (index <= fullQuote.length) {
+        setTypedQuote(fullQuote.slice(0, index));
+        timeoutId = setTimeout(() => typeNext(index + 1), index < 12 ? 24 : 16);
+      } else {
+        timeoutId = setTimeout(() => {
+          setQuoteIndex((prev) => (prev + 1) % MATH_QUOTES.length);
+        }, 4500);
+      }
+    };
+
+    typeNext(1);
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [collapsed, quoteIndex]);
 
   const handleSignOut = async () => {
     if (signingOut) return;
@@ -108,36 +142,32 @@ export function AppSidebar({ user }: { user: User }) {
         </div>
         {!collapsed && (
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-[0.32em] text-white/35">
-              Study OS
-            </p>
             <span className="block font-serif text-3xl leading-none tracking-[-0.04em] text-white">
               UniMath
             </span>
           </div>
         )}
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn(
-            "h-9 w-9 flex-shrink-0 rounded-full border border-white/8 bg-[#13161d] text-white/70 hover:bg-[#181c24] hover:text-white",
-            collapsed ? "absolute right-3 top-5 z-10" : "ml-auto"
-          )}
-          onClick={handleToggleSidebar}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {collapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
-        </Button>
+        {!collapsed && <div className="ml-auto w-6" />}
       </div>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        className={cn(
+          "absolute top-6 z-20 h-9 w-9 rounded-full border border-white/8 bg-[#13161d] text-white/70 shadow-[0_8px_24px_rgba(0,0,0,0.28)] hover:bg-[#181c24] hover:text-white",
+          collapsed ? "-right-4" : "-right-4"
+        )}
+        onClick={handleToggleSidebar}
+        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+      >
+        {collapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+      </Button>
 
       {!collapsed && (
         <div className="relative mx-5 mb-5 rounded-[1.75rem] border border-white/8 bg-[#11141a] p-4">
-          <p className="text-[11px] uppercase tracking-[0.24em] text-white/35">Today</p>
-          <p className="mt-3 font-serif text-3xl leading-none tracking-[-0.04em] text-white">
-            Learn beautifully.
-          </p>
-          <p className="mt-3 text-sm leading-6 text-white/52">
-            Tutor chat, practice, maps, notes, and flashcards in one dark workspace.
+          <p className="text-sm leading-6 text-white/62">
+            {typedQuote}
+            <span className="ml-0.5 inline-block h-4 w-px animate-pulse bg-white/45 align-[-2px]" />
           </p>
         </div>
       )}
