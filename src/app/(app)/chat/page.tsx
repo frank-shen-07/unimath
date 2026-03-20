@@ -132,15 +132,15 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center p-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center mb-6 shadow-lg">
+          <div className="flex h-full flex-col items-center justify-center p-8 text-center">
+            <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/70 shadow-lg">
               <Sparkles className="w-8 h-8 text-primary-foreground" />
             </div>
-            <h2 className="text-2xl font-bold mb-2">Ask me anything about math</h2>
+            <h2 className="mb-2 font-serif text-4xl leading-none tracking-[-0.04em] text-foreground">Ask me anything about math</h2>
             <p className="text-muted-foreground max-w-md leading-relaxed">
               I can help with calculus, linear algebra, differential equations, probability, and more. You can also attach an image of a problem.
             </p>
@@ -154,7 +154,7 @@ export default function ChatPage() {
                 <button
                   key={suggestion}
                   onClick={() => setInput(suggestion)}
-                  className="text-sm px-4 py-2 rounded-full border border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/30 hover:bg-accent transition-all"
+                  className="unimath-pill rounded-full px-4 py-2 text-sm text-muted-foreground transition-all hover:border-primary/30 hover:text-foreground"
                 >
                   {suggestion}
                 </button>
@@ -162,7 +162,7 @@ export default function ChatPage() {
             </div>
           </div>
         ) : (
-          <div className="mx-auto max-w-4xl p-5 space-y-7">
+          <div className="mx-auto max-w-4xl space-y-7 p-5">
             <AnimatePresence mode="popLayout">
               {messages.map((msg, i) => (
                 <motion.div
@@ -179,8 +179,8 @@ export default function ChatPage() {
                   <div
                     className={`max-w-[88%] rounded-2xl px-5 py-4 ${
                       msg.role === "user"
-                        ? "bg-primary text-primary-foreground rounded-br-md"
-                        : "bg-card border border-border/50 rounded-bl-md shadow-sm"
+                        ? "rounded-br-md bg-primary text-primary-foreground shadow-[0_16px_40px_rgba(0,0,0,0.18)]"
+                        : "unimath-panel rounded-bl-md text-card-foreground"
                     }`}
                   >
                     {msg.imagePreview && (
@@ -208,7 +208,7 @@ export default function ChatPage() {
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0 shadow-sm">
                   <Sparkles className="w-4 h-4 text-primary-foreground" />
                 </div>
-                <div className="bg-card border border-border/50 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
+                <div className="unimath-panel rounded-2xl rounded-bl-md px-4 py-3">
                   <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                 </div>
               </motion.div>
@@ -218,10 +218,10 @@ export default function ChatPage() {
       </div>
 
       {/* Input */}
-      <div className="border-t border-border/50 bg-background/80 backdrop-blur-xl p-4">
-        <div className="max-w-3xl mx-auto">
+      <div className="border-t border-border/60 bg-background/70 p-4 backdrop-blur-xl">
+        <div className="mx-auto max-w-3xl">
           {imagePreview && (
-            <div className="relative inline-block mb-3">
+            <div className="relative mb-3 inline-block">
               <img src={imagePreview} alt="Preview" className="h-20 rounded-lg border border-border" />
               <button
                 onClick={clearImage}
@@ -242,7 +242,7 @@ export default function ChatPage() {
             <Button
               variant="outline"
               size="icon"
-              className="h-10 w-10 flex-shrink-0 rounded-xl border-border/50"
+              className="unimath-input h-10 w-10 flex-shrink-0 rounded-xl"
               onClick={() => fileInputRef.current?.click()}
             >
               <ImagePlus className="w-[18px] h-[18px]" />
@@ -253,7 +253,7 @@ export default function ChatPage() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type your math question..."
-              className="min-h-[44px] max-h-32 resize-none rounded-xl border-border/50 bg-card"
+              className="unimath-input min-h-[44px] max-h-32 resize-none rounded-xl"
               rows={1}
             />
             <Button

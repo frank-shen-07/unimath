@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import { MATH_QUOTES } from "@/lib/math-quotes";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -15,7 +14,6 @@ import type { User } from "@supabase/supabase-js";
 import {
   LayoutDashboard,
   MessageSquare,
-  Camera,
   Dumbbell,
   BookOpen,
   Layers,
@@ -32,7 +30,6 @@ import {
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/chat", label: "Chat Tutor", icon: MessageSquare },
-  { href: "/solve", label: "Photo Solve", icon: Camera },
   { href: "/practice", label: "Practice", icon: Dumbbell },
   { href: "/formulas", label: "Formulas", icon: BookOpen },
   { href: "/flashcards", label: "Flashcards", icon: Layers },
@@ -47,8 +44,6 @@ export function AppSidebar({ user }: { user: User }) {
   const [collapsed, setCollapsed] = useState(false);
   const [ready, setReady] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  const [quoteIndex, setQuoteIndex] = useState(0);
-  const [typedQuote, setTypedQuote] = useState("");
   const supabase = createClient();
 
   useEffect(() => {
@@ -57,38 +52,7 @@ export function AppSidebar({ user }: { user: User }) {
       setCollapsed(true);
     }
     setReady(true);
-    setQuoteIndex(Math.floor(Math.random() * MATH_QUOTES.length));
   }, []);
-
-  useEffect(() => {
-    if (collapsed) {
-      return;
-    }
-
-    const fullQuote = MATH_QUOTES[quoteIndex] ?? "";
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-    setTypedQuote("");
-
-    const typeNext = (index: number) => {
-      if (index <= fullQuote.length) {
-        setTypedQuote(fullQuote.slice(0, index));
-        timeoutId = setTimeout(() => typeNext(index + 1), index < 12 ? 24 : 16);
-      } else {
-        timeoutId = setTimeout(() => {
-          setQuoteIndex((prev) => (prev + 1) % MATH_QUOTES.length);
-        }, 4500);
-      }
-    };
-
-    typeNext(1);
-
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [collapsed, quoteIndex]);
 
   const handleSignOut = async () => {
     if (signingOut) return;
@@ -126,25 +90,27 @@ export function AppSidebar({ user }: { user: User }) {
   return (
     <aside
       className={cn(
-        "relative flex h-screen shrink-0 flex-col border-r border-white/8 bg-[#0c0e13] transition-all duration-300",
+        "relative flex h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar/90 backdrop-blur-xl transition-all duration-300",
         collapsed ? "w-[92px]" : "w-[290px]"
       )}
     >
-      <div className="absolute inset-0 editorial-grid opacity-[0.02]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.1),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent_26%)]" />
+      <div className="editorial-grid absolute inset-0 opacity-[0.05]" />
       <div
         className={cn(
           "relative flex items-center px-5 pb-5 pt-6",
           collapsed ? "justify-center" : "gap-4"
         )}
       >
-        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl border border-white/8 bg-[#13161d]">
-          <span className="font-serif text-xl font-semibold text-white">U</span>
+        <div className="unimath-panel-muted flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl">
+          <span className="font-serif text-xl font-semibold text-foreground">U</span>
         </div>
         {!collapsed && (
           <div className="min-w-0">
-            <span className="block font-serif text-3xl leading-none tracking-[-0.04em] text-white">
+            <span className="block font-serif text-3xl leading-none tracking-[-0.04em] text-foreground">
               UniMath
             </span>
+            <p className="font-label mt-1 text-[10px] text-muted-foreground">Study workspace</p>
           </div>
         )}
         {!collapsed && <div className="ml-auto w-6" />}
@@ -154,7 +120,7 @@ export function AppSidebar({ user }: { user: User }) {
         variant="ghost"
         size="icon"
         className={cn(
-          "absolute top-6 z-20 h-9 w-9 rounded-full border border-white/8 bg-[#13161d] text-white/70 shadow-[0_8px_24px_rgba(0,0,0,0.28)] hover:bg-[#181c24] hover:text-white",
+          "unimath-panel absolute top-6 z-20 h-9 w-9 rounded-full text-muted-foreground shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:text-foreground",
           collapsed ? "-right-4" : "-right-4"
         )}
         onClick={handleToggleSidebar}
@@ -162,15 +128,6 @@ export function AppSidebar({ user }: { user: User }) {
       >
         {collapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
       </Button>
-
-      {!collapsed && (
-        <div className="relative mx-5 mb-5 rounded-[1.75rem] border border-white/8 bg-[#11141a] p-4">
-          <p className="text-sm leading-6 text-white/62">
-            {typedQuote}
-            <span className="ml-0.5 inline-block h-4 w-px animate-pulse bg-white/45 align-[-2px]" />
-          </p>
-        </div>
-      )}
 
       <nav className="relative flex-1 space-y-1 px-3">
         {navItems.map((item) => {
@@ -183,8 +140,8 @@ export function AppSidebar({ user }: { user: User }) {
                 "group flex items-center rounded-2xl text-sm font-medium transition-all duration-200",
                 collapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-3",
                 isActive
-                  ? "bg-[#f0f0f0] text-black"
-                  : "text-white/58 hover:bg-[#151922] hover:text-white"
+                  ? "bg-primary text-primary-foreground shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
+                  : "text-sidebar-foreground/66 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               )}
               aria-label={item.label}
             >
@@ -193,7 +150,7 @@ export function AppSidebar({ user }: { user: User }) {
                 <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
                   <span>{item.label}</span>
                   {isActive ? (
-                    <span className="text-[10px] uppercase tracking-[0.24em] text-black/50">
+                    <span className="font-label text-[10px] text-primary-foreground/55">
                       Open
                     </span>
                   ) : null}
@@ -209,7 +166,7 @@ export function AppSidebar({ user }: { user: User }) {
         <button
           onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
           className={cn(
-            "flex w-full items-center rounded-2xl text-sm font-medium text-white/58 transition-all duration-200 hover:bg-[#151922] hover:text-white",
+            "flex w-full items-center rounded-2xl text-sm font-medium text-sidebar-foreground/66 transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-foreground",
             collapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-3"
           )}
           aria-label="Toggle theme"
@@ -229,8 +186,8 @@ export function AppSidebar({ user }: { user: User }) {
             "flex items-center rounded-2xl text-sm font-medium transition-all duration-200",
             collapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-3",
             pathname === "/settings"
-              ? "bg-[#f0f0f0] text-black"
-              : "text-white/58 hover:bg-[#151922] hover:text-white"
+              ? "bg-primary text-primary-foreground shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
+              : "text-sidebar-foreground/66 hover:bg-sidebar-accent hover:text-sidebar-foreground"
           )}
           aria-label="Settings"
         >
@@ -241,7 +198,7 @@ export function AppSidebar({ user }: { user: User }) {
         <button
           onClick={handleSignOut}
           className={cn(
-            "flex w-full items-center rounded-2xl text-sm font-medium text-white/58 transition-all duration-200 hover:bg-[#151922] hover:text-white",
+            "flex w-full items-center rounded-2xl text-sm font-medium text-sidebar-foreground/66 transition-all duration-200 hover:bg-sidebar-accent hover:text-sidebar-foreground",
             collapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-3"
           )}
           aria-label="Sign out"
@@ -254,20 +211,20 @@ export function AppSidebar({ user }: { user: User }) {
 
         <div
           className={cn(
-            "rounded-[1.5rem] border border-white/8 bg-[#11141a] px-3 py-3",
+            "unimath-panel-muted rounded-[1.5rem] px-3 py-3",
             collapsed ? "flex justify-center" : "flex items-center gap-3"
           )}
         >
           <Avatar className="h-10 w-10 flex-shrink-0">
             <AvatarImage src={avatarUrl} alt={displayName} />
-            <AvatarFallback className="bg-[#1a1f28] text-xs font-semibold text-white">
+            <AvatarFallback className="bg-accent text-xs font-semibold text-foreground">
               {displayName.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="overflow-hidden">
-              <p className="truncate text-sm font-medium text-white">{displayName}</p>
-              <p className="truncate text-xs text-white/45">{user.email}</p>
+              <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
+              <p className="truncate text-xs text-muted-foreground">{user.email}</p>
             </div>
           )}
         </div>

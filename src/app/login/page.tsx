@@ -124,26 +124,26 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(124,92,255,0.18),transparent_32%),linear-gradient(180deg,#0c0d15_0%,#090a11_100%)] px-4 py-8">
+    <div className="unimath-shell min-h-screen px-4 py-8">
       <Link
         href="/"
-        className="fixed left-6 top-6 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/60 transition-colors hover:text-white"
+        className="unimath-pill fixed left-6 top-6 z-50 flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground"
       >
         <Home className="w-5 h-5" />
       </Link>
 
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center">
-        <div className="grid w-full overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] shadow-[0_32px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl lg:grid-cols-[1.1fr,0.9fr]">
-          <div className="relative overflow-hidden border-b border-white/10 p-8 lg:border-b-0 lg:border-r lg:p-12">
-            <div className="absolute inset-0 editorial-grid opacity-[0.05]" />
+        <div className="unimath-panel grid w-full overflow-hidden rounded-[2rem] lg:grid-cols-[1.1fr,0.9fr]">
+          <div className="relative overflow-hidden border-b border-border/70 p-8 lg:border-b-0 lg:border-r lg:p-12">
+            <div className="editorial-grid absolute inset-0 opacity-[0.06]" />
             <div className="relative max-w-xl space-y-8">
               <div className="space-y-3">
-                <p className="text-[11px] uppercase tracking-[0.34em] text-white/38">AI Math Tutor</p>
-                <h1 className="font-serif text-6xl leading-none tracking-[-0.05em] text-white sm:text-7xl">
+                <p className="font-label text-[11px] text-muted-foreground">AI Math Tutor</p>
+                <h1 className="font-serif text-6xl leading-none tracking-[-0.05em] text-foreground sm:text-7xl">
                   Study maths in a darker, calmer workspace.
                 </h1>
-                <p className="max-w-lg text-sm leading-7 text-white/58 sm:text-base">
-                  UniMath combines tutoring chat, photo solve, practice, formula sheets, topic maps, and flashcards in one editorial study environment.
+                <p className="max-w-lg text-sm leading-7 text-muted-foreground sm:text-base">
+                  UniMath combines tutoring chat with image uploads, practice, formula sheets, topic maps, and flashcards in one editorial study environment.
                 </p>
               </div>
 
@@ -153,23 +153,23 @@ export default function LoginPage() {
                   ["Maps", "Visualize topic practice"],
                   ["Flashcards", "Generate and review decks"],
                 ].map(([label, detail]) => (
-                  <div key={label} className="rounded-[1.5rem] border border-white/10 bg-black/20 p-4">
-                    <p className="font-serif text-2xl leading-none text-white">{label}</p>
-                    <p className="mt-2 text-sm text-white/45">{detail}</p>
+                  <div key={label} className="unimath-panel-muted rounded-[1.5rem] p-4">
+                    <p className="font-serif text-2xl leading-none text-foreground">{label}</p>
+                    <p className="mt-2 text-sm text-muted-foreground">{detail}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="rounded-[1.75rem] border border-white/10 bg-black/20 p-5">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-white/35">
+              <div className="unimath-panel-muted rounded-[1.75rem] p-5">
+                <p className="font-label text-[11px] text-muted-foreground">
                   {isLogin ? "New here?" : "Already have an account?"}
                 </p>
                 <div className="mt-3 flex items-center justify-between gap-4">
                   <div>
-                    <p className="font-serif text-3xl leading-none tracking-[-0.04em] text-white">
+                    <p className="font-serif text-3xl leading-none tracking-[-0.04em] text-foreground">
                       {isLogin ? "Create your workspace" : "Jump back in"}
                     </p>
-                    <p className="mt-2 text-sm text-white/48">
+                    <p className="mt-2 text-sm text-muted-foreground">
                       {isLogin
                         ? "Sign up with email or Google and your study history syncs to Supabase."
                         : "Use your email/password login or continue with Google."}
@@ -177,7 +177,7 @@ export default function LoginPage() {
                   </div>
                   <button
                     onClick={switchMode}
-                    className="rounded-full border border-white/10 bg-white px-5 py-3 text-sm font-medium text-black transition hover:bg-white/90"
+                    className="rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90"
                   >
                     {isLogin ? "Register" : "Login"}
                   </button>
@@ -198,7 +198,7 @@ export default function LoginPage() {
               transition={{ duration: 0.35 }}
             >
               <motion.div
-                className="flex-1 rounded-[1.75rem] border border-white/10 bg-[#11131d] p-6 sm:p-8"
+                className="unimath-panel-muted flex-1 rounded-[1.75rem] p-6 sm:p-8"
                 custom={isLogin}
                 variants={ctaVariants}
                 initial="enter"
@@ -207,59 +207,59 @@ export default function LoginPage() {
                 transition={{ duration: 0.4, ease: "easeInOut" }}
               >
                 <div className="mb-8">
-                  <p className="text-[11px] uppercase tracking-[0.3em] text-white/38">Welcome back</p>
-                  <h1 className="mt-3 font-serif text-5xl leading-none tracking-[-0.04em] text-white">
+                  <p className="font-label text-[11px] text-muted-foreground">Welcome back</p>
+                  <h1 className="mt-3 font-serif text-5xl leading-none tracking-[-0.04em] text-foreground">
                     Login
                   </h1>
-                  <p className="mt-3 text-sm leading-6 text-white/52">
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">
                     Continue your tutoring chats, formula sheets, and saved decks.
                   </p>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div
-                    className="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-black/20 px-4 py-3"
+                    className="unimath-input flex items-center gap-3 rounded-[1.25rem] px-4 py-3"
                   >
-                    <Mail className="w-5 h-5 text-white/35 flex-shrink-0" />
+                    <Mail className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                     <div className="flex-1">
-                      <label className="block text-xs text-white/35">Email</label>
+                      <label className="block text-xs text-muted-foreground">Email</label>
                       <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="name@email.com"
                         required
-                        className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/20"
+                        className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
                       />
                     </div>
                   </div>
 
                   <div
-                    className="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-black/20 px-4 py-3"
+                    className="unimath-input flex items-center gap-3 rounded-[1.25rem] px-4 py-3"
                   >
-                    <Lock className="w-5 h-5 text-white/35 flex-shrink-0" />
+                    <Lock className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                     <div className="flex-1">
-                      <label className="block text-xs text-white/35">Password</label>
+                      <label className="block text-xs text-muted-foreground">Password</label>
                       <input
                         type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="••••••••"
                         required
-                        className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/20"
+                        className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
                       />
                     </div>
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="text-white/35 hover:text-white/70 flex-shrink-0"
+                      className="text-muted-foreground hover:text-foreground flex-shrink-0"
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
 
                   <div className="flex items-center justify-between text-sm">
-                    <label className="flex cursor-pointer items-center gap-2 text-white/45">
+                    <label className="flex cursor-pointer items-center gap-2 text-muted-foreground">
                       <input
                         type="checkbox"
                         checked={rememberMe}
@@ -268,10 +268,7 @@ export default function LoginPage() {
                       />
                       Remember me
                     </label>
-                    <button
-                      type="button"
-                      className="font-medium text-white/55 hover:text-white"
-                    >
+                    <button type="button" className="font-medium text-foreground/60 hover:text-foreground">
                       Forgot password?
                     </button>
                   </div>
@@ -287,21 +284,21 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full rounded-full bg-white py-3 text-base font-semibold text-black transition-all duration-200 hover:bg-white/90 disabled:opacity-60"
+                    className="w-full rounded-full bg-primary py-3 text-base font-semibold text-primary-foreground transition-all duration-200 hover:opacity-90 disabled:opacity-60"
                   >
                     {loading ? "Logging in..." : "Login"}
                   </button>
                 </form>
 
                 <div className="flex items-center gap-4 my-5">
-                  <div className="flex-1 h-px bg-white/10" />
-                  <span className="text-sm text-white/28">or</span>
-                  <div className="flex-1 h-px bg-white/10" />
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-sm text-muted-foreground">or</span>
+                  <div className="flex-1 h-px bg-border" />
                 </div>
 
                 <button
                   onClick={handleGoogleAuth}
-                  className="flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] py-3 text-sm font-medium text-white transition-all duration-200 hover:bg-white/[0.08]"
+                  className="unimath-pill flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-medium text-foreground transition-all duration-200 hover:bg-accent/70"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -323,7 +320,7 @@ export default function LoginPage() {
               transition={{ duration: 0.35 }}
             >
               <motion.div
-                className="flex-1 rounded-[1.75rem] border border-white/10 bg-[#11131d] p-6 sm:p-8"
+                className="unimath-panel-muted flex-1 rounded-[1.75rem] p-6 sm:p-8"
                 custom={isLogin}
                 variants={formCardVariants}
                 initial="enter"
@@ -332,92 +329,92 @@ export default function LoginPage() {
                 transition={{ duration: 0.4, ease: "easeInOut" }}
               >
                 <div className="mb-6">
-                  <p className="text-[11px] uppercase tracking-[0.3em] text-white/38">Create account</p>
-                  <h1 className="mt-3 font-serif text-5xl leading-none tracking-[-0.04em] text-white">
+                  <p className="font-label text-[11px] text-muted-foreground">Create account</p>
+                  <h1 className="mt-3 font-serif text-5xl leading-none tracking-[-0.04em] text-foreground">
                     Register
                   </h1>
-                  <p className="mt-3 text-sm leading-6 text-white/52">
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">
                     Save your conversations, notes, knowledge map progress, and flashcard decks.
                   </p>
                 </div>
 
                 <form onSubmit={handleRegister} className="space-y-3.5">
                   <div
-                    className="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-black/20 px-4 py-3"
+                    className="unimath-input flex items-center gap-3 rounded-[1.25rem] px-4 py-3"
                   >
-                    <Mail className="w-5 h-5 text-white/35 flex-shrink-0" />
+                    <Mail className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                     <div className="flex-1">
-                      <label className="block text-xs text-white/35">Email</label>
+                      <label className="block text-xs text-muted-foreground">Email</label>
                       <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="name@email.com"
                         required
-                        className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/20"
+                        className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
                       />
                     </div>
                   </div>
 
                   <div
-                    className="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-black/20 px-4 py-3"
+                    className="unimath-input flex items-center gap-3 rounded-[1.25rem] px-4 py-3"
                   >
-                    <User className="w-5 h-5 text-white/35 flex-shrink-0" />
+                    <User className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                     <div className="flex-1">
-                      <label className="block text-xs text-white/35">Display name</label>
+                      <label className="block text-xs text-muted-foreground">Display name</label>
                       <input
                         type="text"
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
                         placeholder="Your Name"
                         required
-                        className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/20"
+                        className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
                       />
                     </div>
                   </div>
 
                   <div
-                    className="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-black/20 px-4 py-3"
+                    className="unimath-input flex items-center gap-3 rounded-[1.25rem] px-4 py-3"
                   >
-                    <Lock className="w-5 h-5 text-white/35 flex-shrink-0" />
+                    <Lock className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                     <div className="flex-1">
-                      <label className="block text-xs text-white/35">Password</label>
+                      <label className="block text-xs text-muted-foreground">Password</label>
                       <input
                         type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="••••••••"
                         required
-                        className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/20"
+                        className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
                       />
                     </div>
                   </div>
 
                   <div
-                    className="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-black/20 px-4 py-3"
+                    className="unimath-input flex items-center gap-3 rounded-[1.25rem] px-4 py-3"
                   >
-                    <Lock className="w-5 h-5 text-white/35 flex-shrink-0" />
+                    <Lock className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                     <div className="flex-1">
-                      <label className="block text-xs text-white/35">Confirm password</label>
+                      <label className="block text-xs text-muted-foreground">Confirm password</label>
                       <input
                         type={showConfirmPassword ? "text" : "password"}
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder="••••••••"
                         required
-                        className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/20"
+                        className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
                       />
                     </div>
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="text-white/35 hover:text-white/70 flex-shrink-0"
+                      className="text-muted-foreground hover:text-foreground flex-shrink-0"
                     >
                       {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
 
-                  <label className="flex cursor-pointer items-start gap-2 text-sm text-white/45">
+                  <label className="flex cursor-pointer items-start gap-2 text-sm text-muted-foreground">
                     <input
                       type="checkbox"
                       checked={agreedToTerms}
@@ -426,7 +423,7 @@ export default function LoginPage() {
                     />
                     <span>
                       I have read and agree to the{" "}
-                      <span className="underline text-white">
+                      <span className="underline text-foreground">
                         Disclaimer
                       </span>
                       .
@@ -444,21 +441,21 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full rounded-full bg-white py-3 text-base font-semibold text-black transition-all duration-200 hover:bg-white/90 disabled:opacity-60"
+                    className="w-full rounded-full bg-primary py-3 text-base font-semibold text-primary-foreground transition-all duration-200 hover:opacity-90 disabled:opacity-60"
                   >
                     {loading ? "Creating account..." : "Register"}
                   </button>
                 </form>
 
                 <div className="flex items-center gap-4 my-4">
-                  <div className="flex-1 h-px bg-white/10" />
-                  <span className="text-sm text-white/28">or</span>
-                  <div className="flex-1 h-px bg-white/10" />
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-sm text-muted-foreground">or</span>
+                  <div className="flex-1 h-px bg-border" />
                 </div>
 
                 <button
                   onClick={handleGoogleAuth}
-                  className="flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] py-3 text-sm font-medium text-white transition-all duration-200 hover:bg-white/[0.08]"
+                  className="unimath-pill flex w-full items-center justify-center gap-2 rounded-full py-3 text-sm font-medium text-foreground transition-all duration-200 hover:bg-accent/70"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />

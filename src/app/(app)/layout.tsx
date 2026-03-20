@@ -15,9 +15,9 @@ export default async function AppLayout({
   }
 
   return (
-    <div className="flex min-h-screen overflow-hidden bg-[#090a11]">
+    <div className="unimath-shell flex min-h-screen overflow-hidden">
       <AppSidebar user={user} />
-      <main className="flex-1 overflow-y-auto">
+      <main className="relative flex-1 overflow-y-auto">
         {children}
       </main>
     </div>

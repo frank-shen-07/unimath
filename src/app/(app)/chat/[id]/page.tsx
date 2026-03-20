@@ -157,7 +157,7 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
 
   if (pageLoading) {
     return (
-      <div className="p-6 space-y-4 max-w-3xl mx-auto">
+      <div className="mx-auto max-w-3xl space-y-4 p-6">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-24 w-full" />
         <Skeleton className="h-24 w-3/4" />
@@ -166,20 +166,20 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="border-b border-border/50 bg-background/80 backdrop-blur-xl px-4 py-3 flex items-center gap-3">
+      <div className="flex items-center gap-3 border-b border-border/60 bg-background/70 px-4 py-3 backdrop-blur-xl">
         <Link href="/chat">
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
             <ArrowLeft className="w-4 h-4" />
           </Button>
         </Link>
-        <h1 className="font-semibold truncate">{title}</h1>
+        <h1 className="truncate font-semibold">{title}</h1>
       </div>
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-4xl p-5 space-y-7">
+        <div className="mx-auto max-w-4xl space-y-7 p-5">
           <AnimatePresence mode="popLayout">
             {messages.map((msg, i) => (
               <motion.div
@@ -196,8 +196,8 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
                 <div
                   className={`max-w-[88%] rounded-2xl px-5 py-4 ${
                     msg.role === "user"
-                      ? "bg-primary text-primary-foreground rounded-br-md"
-                      : "bg-card border border-border/50 rounded-bl-md shadow-sm"
+                      ? "rounded-br-md bg-primary text-primary-foreground shadow-[0_16px_40px_rgba(0,0,0,0.18)]"
+                      : "unimath-panel rounded-bl-md text-card-foreground"
                   }`}
                 >
                   {msg.imagePreview && (
@@ -217,7 +217,7 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0 shadow-sm">
                 <Sparkles className="w-4 h-4 text-primary-foreground" />
               </div>
-              <div className="bg-card border border-border/50 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
+              <div className="unimath-panel rounded-2xl rounded-bl-md px-4 py-3">
                 <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
               </div>
             </motion.div>
@@ -226,10 +226,10 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* Input */}
-      <div className="border-t border-border/50 bg-background/80 backdrop-blur-xl p-4">
-        <div className="max-w-3xl mx-auto">
+      <div className="border-t border-border/60 bg-background/70 p-4 backdrop-blur-xl">
+        <div className="mx-auto max-w-3xl">
           {imagePreview && (
-            <div className="relative inline-block mb-3">
+            <div className="relative mb-3 inline-block">
               <img src={imagePreview} alt="Preview" className="h-20 rounded-lg border border-border" />
               <button
                 onClick={clearImage}
@@ -244,7 +244,7 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
             <Button
               variant="outline"
               size="icon"
-              className="h-10 w-10 flex-shrink-0 rounded-xl border-border/50"
+              className="unimath-input h-10 w-10 flex-shrink-0 rounded-xl"
               onClick={() => fileInputRef.current?.click()}
             >
               <ImagePlus className="w-4 h-4" />
@@ -254,7 +254,7 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Continue the conversation..."
-              className="min-h-[44px] max-h-32 resize-none rounded-xl border-border/50 bg-card"
+              className="unimath-input min-h-[44px] max-h-32 resize-none rounded-xl"
               rows={1}
             />
             <Button

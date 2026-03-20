@@ -42,22 +42,22 @@ export default function HistoryPage() {
 
       <EditorialPanel>
         <Tabs defaultValue="conversations" className="w-full">
-          <TabsList className="grid h-12 w-full grid-cols-2 rounded-[1.25rem] bg-white/[0.05] p-1">
-          <TabsTrigger value="conversations" className="rounded-[1rem] gap-2 text-white/65 data-active:bg-white data-active:text-black">
+          <TabsList className="unimath-panel-muted grid h-12 w-full grid-cols-2 rounded-[1.25rem] p-1">
+          <TabsTrigger value="conversations" className="rounded-[1rem] gap-2 text-muted-foreground data-active:bg-primary data-active:text-primary-foreground">
             <MessageSquare className="w-4 h-4" /> Conversations
           </TabsTrigger>
-          <TabsTrigger value="practice" className="rounded-[1rem] gap-2 text-white/65 data-active:bg-white data-active:text-black">
+          <TabsTrigger value="practice" className="rounded-[1rem] gap-2 text-muted-foreground data-active:bg-primary data-active:text-primary-foreground">
             <Dumbbell className="w-4 h-4" /> Practice Sessions
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="conversations" className="mt-4 space-y-2">
           {loading ? (
-            <div className="space-y-3">{[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-20 rounded-[1.5rem] bg-white/8" />)}</div>
+            <div className="space-y-3">{[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-20 rounded-[1.5rem] bg-foreground/8" />)}</div>
           ) : conversations.length === 0 ? (
-            <div className="rounded-[1.5rem] border border-dashed border-white/12 bg-black/15 p-8 text-center">
+            <div className="unimath-panel-muted rounded-[1.5rem] border-dashed p-8 text-center">
                 <MessageSquare className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
-                <p className="font-medium text-white">No conversations yet</p>
+                <p className="font-medium text-foreground">No conversations yet</p>
                 <Link href="/chat" className="inline-flex items-center gap-1 mt-3 text-sm text-primary hover:underline">
                   Start a chat <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
@@ -65,15 +65,15 @@ export default function HistoryPage() {
           ) : (
             conversations.map((conv) => (
               <Link key={conv.id} href={`/chat/${conv.id}`}>
-                <div className="cursor-pointer rounded-[1.5rem] border border-white/10 bg-black/20 p-4 transition-all duration-200 hover:bg-white/[0.05]">
+                <div className="unimath-panel-muted cursor-pointer rounded-[1.5rem] p-4 transition-all duration-200 hover:border-primary/20">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-white/[0.08] flex items-center justify-center flex-shrink-0">
+                      <div className="unimath-panel-muted flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl">
                         <MessageSquare className="w-4 h-4 text-primary" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-medium truncate text-white">{conv.title}</p>
-                        <p className="text-sm text-white/48 flex items-center gap-1">
+                        <p className="truncate font-medium text-foreground">{conv.title}</p>
+                        <p className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Clock className="w-3 h-3" />
                           {new Date(conv.updated_at).toLocaleDateString(undefined, {
                             month: "short", day: "numeric", year: "numeric",
@@ -81,7 +81,7 @@ export default function HistoryPage() {
                         </p>
                       </div>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-white/32 flex-shrink-0" />
+                    <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                   </div>
                 </div>
               </Link>
@@ -91,11 +91,11 @@ export default function HistoryPage() {
 
         <TabsContent value="practice" className="mt-4 space-y-2">
           {loading ? (
-            <div className="space-y-3">{[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-20 rounded-[1.5rem] bg-white/8" />)}</div>
+            <div className="space-y-3">{[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-20 rounded-[1.5rem] bg-foreground/8" />)}</div>
           ) : sessions.length === 0 ? (
-            <div className="rounded-[1.5rem] border border-dashed border-white/12 bg-black/15 p-8 text-center">
+            <div className="unimath-panel-muted rounded-[1.5rem] border-dashed p-8 text-center">
                 <Dumbbell className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
-                <p className="font-medium text-white">No practice sessions yet</p>
+                <p className="font-medium text-foreground">No practice sessions yet</p>
                 <Link href="/practice" className="inline-flex items-center gap-1 mt-3 text-sm text-primary hover:underline">
                   Start practicing <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
@@ -104,18 +104,18 @@ export default function HistoryPage() {
             sessions.map((session) => {
               const accuracy = session.total_questions > 0 ? Math.round((session.correct_answers / session.total_questions) * 100) : 0;
               return (
-                <div key={session.id} className="rounded-[1.5rem] border border-white/10 bg-black/20 p-4">
+                <div key={session.id} className="unimath-panel-muted rounded-[1.5rem] p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-white/[0.08] flex items-center justify-center flex-shrink-0">
+                      <div className="unimath-panel-muted flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl">
                         <Target className="w-4 h-4 text-amber-500" />
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="font-medium truncate text-white">{session.topic}</p>
-                          <Badge variant="outline" className="rounded-full border-white/10 bg-white/[0.04] text-xs capitalize text-white/70">{session.difficulty}</Badge>
+                          <p className="truncate font-medium text-foreground">{session.topic}</p>
+                          <Badge variant="outline" className="rounded-full border-border bg-accent/60 text-xs capitalize text-foreground">{session.difficulty}</Badge>
                         </div>
-                        <p className="text-sm text-white/48">
+                        <p className="text-sm text-muted-foreground">
                           {session.correct_answers}/{session.total_questions} correct &middot;{" "}
                           {new Date(session.created_at).toLocaleDateString(undefined, {
                             month: "short", day: "numeric",

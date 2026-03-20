@@ -55,7 +55,7 @@ export default function SettingsPage() {
         title="Settings"
         description="Manage your profile, theme, and optional API overrides."
         aside={
-          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm text-white/70">
+          <div className="unimath-pill flex items-center gap-2 rounded-full px-4 py-2 text-sm text-foreground/72">
             <Settings className="h-4 w-4 text-primary" />
             Personal workspace controls
           </div>
@@ -66,18 +66,18 @@ export default function SettingsPage() {
         <EditorialPanel>
           <div className="flex items-center gap-2">
             <User className="h-4 w-4 text-primary" />
-            <p className="text-xs uppercase tracking-[0.24em] text-white/38">Account</p>
+            <p className="font-label text-xs text-muted-foreground">Account</p>
           </div>
           <div className="mt-5 flex items-center gap-4">
           <Avatar className="h-14 w-14">
             <AvatarImage src={avatarUrl} alt={displayName} />
-            <AvatarFallback className="bg-white/10 text-lg font-semibold text-white">
+            <AvatarFallback className="bg-accent text-lg font-semibold text-foreground">
               {displayName.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-lg font-semibold text-white">{displayName}</p>
-            <p className="text-white/48">{user?.email}</p>
+            <p className="text-lg font-semibold text-foreground">{displayName}</p>
+            <p className="text-muted-foreground">{user?.email}</p>
           </div>
           </div>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -87,11 +87,11 @@ export default function SettingsPage() {
         </EditorialPanel>
 
         <EditorialPanel>
-          <p className="text-xs uppercase tracking-[0.24em] text-white/38">Appearance</p>
-          <h2 className="mt-2 font-serif text-3xl leading-none tracking-[-0.04em] text-white">
+          <p className="font-label text-xs text-muted-foreground">Appearance</p>
+          <h2 className="mt-2 font-serif text-3xl leading-none tracking-[-0.04em] text-foreground">
             Choose your theme
           </h2>
-          <p className="mt-3 text-sm leading-6 text-white/52">
+          <p className="mt-3 text-sm leading-6 text-muted-foreground">
             Light, dark, or system. Dark is the new default across the redesigned app.
           </p>
           <div className="mt-5 grid grid-cols-3 gap-3">
@@ -105,8 +105,8 @@ export default function SettingsPage() {
                 onClick={() => setTheme(t.value)}
                 className={`flex flex-col items-center gap-2 rounded-[1.5rem] border p-4 transition-all ${
                   theme === t.value
-                    ? "border-white/20 bg-white text-black"
-                    : "border-white/10 bg-black/20 text-white hover:bg-white/[0.06]"
+                    ? "border-primary/25 bg-primary text-primary-foreground"
+                    : "border-border bg-card/70 text-foreground hover:bg-accent/70"
                 }`}
               >
                 <t.icon className="w-5 h-5" />
@@ -119,10 +119,10 @@ export default function SettingsPage() {
         <EditorialPanel className="xl:col-span-2">
           <div className="flex items-center gap-2">
             <Key className="h-4 w-4 text-primary" />
-            <p className="text-xs uppercase tracking-[0.24em] text-white/38">API override</p>
+            <p className="font-label text-xs text-muted-foreground">API override</p>
           </div>
           <div className="mt-4 max-w-2xl">
-            <p className="text-sm leading-6 text-white/52">
+            <p className="text-sm leading-6 text-muted-foreground">
               Optionally provide your own Gemini API key. If left empty, the server-side default is used.
             </p>
           </div>
@@ -132,9 +132,9 @@ export default function SettingsPage() {
             onChange={(e) => setGeminiKey(e.target.value)}
             placeholder="AIza..."
             type="password"
-            className="h-12 rounded-[1.25rem] border-white/10 bg-black/20 text-white placeholder:text-white/30"
+            className="unimath-input h-12 rounded-[1.25rem] text-foreground placeholder:text-muted-foreground/60"
           />
-          <Button onClick={handleSaveKey} variant="outline" className="h-11 rounded-full border-white/10 bg-white/[0.04] px-5 text-white hover:bg-white/[0.08]">
+          <Button onClick={handleSaveKey} variant="outline" className="unimath-pill h-11 rounded-full px-5 text-foreground hover:bg-accent/70">
             Save Key
           </Button>
           </div>
