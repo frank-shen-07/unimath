@@ -92,18 +92,18 @@ export function AppSidebar({ user }: { user: User }) {
   return (
     <aside
       className={cn(
-        "relative flex h-screen shrink-0 flex-col border-r border-white/10 bg-[#0d0f18]/95 transition-all duration-300",
+        "relative flex h-screen shrink-0 flex-col border-r border-white/8 bg-[#0c0e13] transition-all duration-300",
         collapsed ? "w-[92px]" : "w-[290px]"
       )}
     >
-      <div className="absolute inset-0 editorial-grid opacity-[0.035]" />
+      <div className="absolute inset-0 editorial-grid opacity-[0.02]" />
       <div
         className={cn(
           "relative flex items-center px-5 pb-5 pt-6",
           collapsed ? "justify-center" : "gap-4"
         )}
       >
-        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] shadow-[0_12px_40px_rgba(0,0,0,0.25)]">
+        <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl border border-white/8 bg-[#13161d]">
           <span className="font-serif text-xl font-semibold text-white">U</span>
         </div>
         {!collapsed && (
@@ -120,7 +120,7 @@ export function AppSidebar({ user }: { user: User }) {
           variant="ghost"
           size="icon"
           className={cn(
-            "h-9 w-9 flex-shrink-0 rounded-full border border-white/10 bg-white/[0.03] text-white/70 hover:bg-white/[0.08] hover:text-white",
+            "h-9 w-9 flex-shrink-0 rounded-full border border-white/8 bg-[#13161d] text-white/70 hover:bg-[#181c24] hover:text-white",
             collapsed ? "absolute right-3 top-5 z-10" : "ml-auto"
           )}
           onClick={handleToggleSidebar}
@@ -131,7 +131,7 @@ export function AppSidebar({ user }: { user: User }) {
       </div>
 
       {!collapsed && (
-        <div className="relative mx-5 mb-5 rounded-[1.75rem] border border-white/10 bg-white/[0.04] p-4">
+        <div className="relative mx-5 mb-5 rounded-[1.75rem] border border-white/8 bg-[#11141a] p-4">
           <p className="text-[11px] uppercase tracking-[0.24em] text-white/35">Today</p>
           <p className="mt-3 font-serif text-3xl leading-none tracking-[-0.04em] text-white">
             Learn beautifully.
@@ -153,8 +153,8 @@ export function AppSidebar({ user }: { user: User }) {
                 "group flex items-center rounded-2xl text-sm font-medium transition-all duration-200",
                 collapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-3",
                 isActive
-                  ? "bg-white text-black shadow-[0_16px_40px_rgba(255,255,255,0.12)]"
-                  : "text-white/58 hover:bg-white/[0.06] hover:text-white"
+                  ? "bg-[#f0f0f0] text-black"
+                  : "text-white/58 hover:bg-[#151922] hover:text-white"
               )}
               aria-label={item.label}
             >
@@ -179,7 +179,7 @@ export function AppSidebar({ user }: { user: User }) {
         <button
           onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
           className={cn(
-            "flex w-full items-center rounded-2xl text-sm font-medium text-white/58 transition-all duration-200 hover:bg-white/[0.06] hover:text-white",
+            "flex w-full items-center rounded-2xl text-sm font-medium text-white/58 transition-all duration-200 hover:bg-[#151922] hover:text-white",
             collapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-3"
           )}
           aria-label="Toggle theme"
@@ -199,8 +199,8 @@ export function AppSidebar({ user }: { user: User }) {
             "flex items-center rounded-2xl text-sm font-medium transition-all duration-200",
             collapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-3",
             pathname === "/settings"
-              ? "bg-white text-black shadow-[0_16px_40px_rgba(255,255,255,0.12)]"
-              : "text-white/58 hover:bg-white/[0.06] hover:text-white"
+              ? "bg-[#f0f0f0] text-black"
+              : "text-white/58 hover:bg-[#151922] hover:text-white"
           )}
           aria-label="Settings"
         >
@@ -211,7 +211,7 @@ export function AppSidebar({ user }: { user: User }) {
         <button
           onClick={handleSignOut}
           className={cn(
-            "flex w-full items-center rounded-2xl text-sm font-medium text-white/58 transition-all duration-200 hover:bg-white/[0.06] hover:text-white",
+            "flex w-full items-center rounded-2xl text-sm font-medium text-white/58 transition-all duration-200 hover:bg-[#151922] hover:text-white",
             collapsed ? "justify-center px-0 py-3" : "gap-3 px-4 py-3"
           )}
           aria-label="Sign out"
@@ -224,13 +224,13 @@ export function AppSidebar({ user }: { user: User }) {
 
         <div
           className={cn(
-            "rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-3 py-3",
+            "rounded-[1.5rem] border border-white/8 bg-[#11141a] px-3 py-3",
             collapsed ? "flex justify-center" : "flex items-center gap-3"
           )}
         >
           <Avatar className="h-10 w-10 flex-shrink-0">
             <AvatarImage src={avatarUrl} alt={displayName} />
-            <AvatarFallback className="bg-white/10 text-xs font-semibold text-white">
+            <AvatarFallback className="bg-[#1a1f28] text-xs font-semibold text-white">
               {displayName.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>

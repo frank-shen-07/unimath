@@ -266,12 +266,54 @@ export default function FlashcardsPage() {
       ? Math.round((activeDeck.known_count / activeDeck.studied_count) * 100)
       : 0;
 
+  useEffect(() => {
+    if (!activeDeck || activeDeck.flashcards.length === 0) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      const tag = target?.tagName?.toLowerCase();
+      if (tag === "input" || tag === "textarea") {
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        setActiveIndex((index) =>
+          activeDeck.flashcards.length === 0
+            ? 0
+            : (index - 1 + activeDeck.flashcards.length) % activeDeck.flashcards.length
+        );
+        setFlipped(false);
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        setActiveIndex((index) =>
+          activeDeck.flashcards.length === 0
+            ? 0
+            : (index + 1) % activeDeck.flashcards.length
+        );
+        setFlipped(false);
+      }
+
+      if (event.key === " " || event.key === "Enter") {
+        event.preventDefault();
+        setFlipped((value) => !value);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeDeck]);
+
   return (
     <EditorialPage>
       <EditorialHeader
         eyebrow="Flashcards"
         title="Generate, save, and study decks"
-        description="Turn broad topics or your own notes into reusable university math flashcards, then review them with known versus unknown tracking."
+        description="Turn broad topics or your own notes into reusable university math flashcards, then study them in a dedicated flip-card flow with keyboard navigation and review tracking."
         aside={
           <div className="grid min-w-[240px] gap-3 sm:grid-cols-2">
             <EditorialStat label="Decks" value={decks.length} detail="Saved for later review" />
@@ -327,7 +369,7 @@ export default function FlashcardsPage() {
                   onClick={handleSaveDeck}
                   disabled={saving || generatedCards.length === 0}
                   variant="outline"
-                  className="h-11 rounded-full border-white/10 bg-white/[0.04] px-5 text-white hover:bg-white/[0.08]"
+                  className="h-11 rounded-full border-white/8 bg-[#141821] px-5 text-white hover:bg-[#181d27]"
                 >
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
                   Save deck
@@ -345,7 +387,7 @@ export default function FlashcardsPage() {
                 </h2>
               </div>
               {generatedCards.length > 0 ? (
-                <div className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-sm text-white/65">
+                <div className="rounded-full border border-white/8 bg-[#141821] px-3 py-1 text-sm text-white/65">
                   {generatedCards.length} cards
                 </div>
               ) : null}
@@ -359,12 +401,16 @@ export default function FlashcardsPage() {
                 </p>
               </div>
             ) : (
-              <div className="mt-5 grid gap-3">
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {generatedCards.slice(0, 4).map((card, index) => (
-                  <div key={`${card.front}-${index}`} className="rounded-[1.5rem] border border-white/10 bg-black/20 p-4">
+                  <div
+                    key={`${card.front}-${index}`}
+                    className="rounded-[1.75rem] border border-white/8 bg-[#0c0f14] p-5"
+                  >
                     <p className="text-[11px] uppercase tracking-[0.24em] text-white/35">Card {index + 1}</p>
-                    <p className="mt-3 text-base font-medium text-white">{card.front}</p>
-                    <MathRenderer content={card.back} className="mt-3 text-white/72 prose-p:text-white/72" />
+                    <p className="mt-3 text-lg font-medium text-white">{card.front}</p>
+                    <div className="mt-4 h-px bg-white/10" />
+                    <MathRenderer content={card.back} className="mt-4 text-white/72 prose-p:text-white/72" />
                   </div>
                 ))}
               </div>
@@ -408,8 +454,8 @@ export default function FlashcardsPage() {
                       onClick={() => void loadDeckDetails(deck.id)}
                       className={`w-full rounded-[1.5rem] border p-4 text-left transition ${
                         isActive
-                          ? "border-white/20 bg-white/[0.08]"
-                          : "border-white/10 bg-black/20 hover:bg-white/[0.05]"
+                          ? "border-white/16 bg-[#181c24]"
+                          : "border-white/8 bg-[#0b0d12] hover:bg-[#11151c]"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
@@ -419,7 +465,7 @@ export default function FlashcardsPage() {
                             {deck.topic || "Custom notes"}
                           </p>
                         </div>
-                        <div className="rounded-full border border-white/10 px-2.5 py-1 text-xs text-white/55">
+                        <div className="rounded-full border border-white/8 bg-[#141821] px-2.5 py-1 text-xs text-white/55">
                           {deck.card_count} cards
                         </div>
                       </div>
@@ -443,7 +489,7 @@ export default function FlashcardsPage() {
                 </h2>
               </div>
               {activeDeck ? (
-                <div className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-sm text-white/60">
+                <div className="rounded-full border border-white/8 bg-[#141821] px-3 py-1 text-sm text-white/60">
                   {activeIndex + 1}/{activeDeck.flashcards.length}
                 </div>
               ) : null}
@@ -457,29 +503,74 @@ export default function FlashcardsPage() {
                   <EditorialStat label="Mastery" value={`${mastery}%`} />
                 </div>
 
-                <button
-                  onClick={() => setFlipped((value) => !value)}
-                  className="w-full [perspective:1800px]"
-                >
-                  <motion.div
-                    animate={{ rotateY: flipped ? 180 : 0 }}
-                    transition={{ duration: 0.55 }}
-                    className="relative min-h-[340px] rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.03] p-6 text-left shadow-[0_24px_80px_rgba(0,0,0,0.28)] [transform-style:preserve-3d]"
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-3 text-sm text-white/45">
+                    <span>Click card to flip</span>
+                    <span>Use `←`, `→`, and `space`</span>
+                  </div>
+
+                  <button
+                    onClick={() => setFlipped((value) => !value)}
+                    className="w-full [perspective:2200px]"
+                    aria-label="Flip flashcard"
                   >
-                    <div className="absolute inset-0 backface-hidden">
-                      <p className="text-[11px] uppercase tracking-[0.24em] text-white/35">Front</p>
-                      <div className="mt-10 flex h-full items-start">
-                        <MathRenderer content={currentCard.front} className="text-lg text-white prose-p:text-white" />
+                    <motion.div
+                      animate={{ rotateY: flipped ? 180 : 0, y: flipped ? -4 : 0 }}
+                      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                      className="relative min-h-[420px] rounded-[2.25rem] border border-white/10 bg-transparent text-left shadow-[0_30px_100px_rgba(0,0,0,0.35)] [transform-style:preserve-3d]"
+                    >
+                      <div className="absolute inset-0 rounded-[2.25rem] border border-white/8 bg-[#11151c] p-7 [backface-visibility:hidden]">
+                        <div className="flex h-full flex-col">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-[11px] uppercase tracking-[0.24em] text-white/35">Front</p>
+                            <span className="rounded-full border border-white/8 bg-[#0b0d12] px-3 py-1 text-xs text-white/45">
+                              Tap to reveal
+                            </span>
+                          </div>
+                          <div className="flex flex-1 items-center justify-center py-10">
+                            <MathRenderer
+                              content={currentCard.front}
+                              className="max-w-2xl text-center text-2xl text-white prose-p:text-white prose-p:leading-9"
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="absolute inset-0 rounded-[2rem] p-6 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                      <p className="text-[11px] uppercase tracking-[0.24em] text-white/35">Back</p>
-                      <div className="mt-10">
-                        <MathRenderer content={currentCard.back} className="text-white/78 prose-p:text-white/78" />
+
+                      <div className="absolute inset-0 rounded-[2.25rem] border border-white/8 bg-[#141821] p-7 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                        <div className="flex h-full flex-col">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-[11px] uppercase tracking-[0.24em] text-white/35">Back</p>
+                            <span className="rounded-full border border-white/8 bg-[#0b0d12] px-3 py-1 text-xs text-white/45">
+                              Explanation
+                            </span>
+                          </div>
+                          <div className="flex flex-1 items-center py-6">
+                            <MathRenderer
+                              content={currentCard.back}
+                              className="mx-auto max-w-2xl text-lg text-white/80 prose-p:text-white/80 prose-p:leading-8"
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
-                </button>
+                    </motion.div>
+                  </button>
+
+                  <div className="flex justify-center gap-2">
+                    {activeDeck.flashcards.map((card, index) => (
+                      <button
+                        key={card.id}
+                        onClick={() => {
+                          setActiveIndex(index);
+                          setFlipped(false);
+                        }}
+                        className={`h-2.5 rounded-full transition-all ${
+                          index === activeIndex ? "w-8 bg-white" : "w-2.5 bg-white/20 hover:bg-white/40"
+                        }`}
+                        aria-label={`Go to card ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                </div>
 
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex gap-2">
@@ -493,7 +584,7 @@ export default function FlashcardsPage() {
                         setFlipped(false);
                       }}
                       variant="outline"
-                      className="h-11 rounded-full border-white/10 bg-white/[0.04] px-4 text-white hover:bg-white/[0.08]"
+                      className="h-11 rounded-full border-white/8 bg-[#141821] px-4 text-white hover:bg-[#181d27]"
                     >
                       <ChevronLeft className="h-4 w-4" />
                       Prev
@@ -508,7 +599,7 @@ export default function FlashcardsPage() {
                         setFlipped(false);
                       }}
                       variant="outline"
-                      className="h-11 rounded-full border-white/10 bg-white/[0.04] px-4 text-white hover:bg-white/[0.08]"
+                      className="h-11 rounded-full border-white/8 bg-[#141821] px-4 text-white hover:bg-[#181d27]"
                     >
                       Next
                       <ChevronRight className="h-4 w-4" />

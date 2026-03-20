@@ -125,8 +125,8 @@
   body {
     @apply bg-background text-foreground;
     background-image:
-      radial-gradient(circle at top, rgba(124, 92, 255, 0.12), transparent 28%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 30%);
+      radial-gradient(circle at top, rgba(124, 92, 255, 0.045), transparent 24%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.01), transparent 26%);
   }
   html {
     @apply font-sans;
@@ -139,8 +139,8 @@
 
 @utility editorial-grid {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 
