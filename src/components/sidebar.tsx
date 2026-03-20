@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -42,11 +42,41 @@ export function AppSidebar({ user }: { user: User }) {
   const router = useRouter();
   const { setTheme, resolvedTheme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
+  const [ready, setReady] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const supabase = createClient();
 
+  useEffect(() => {
+    const storedValue = window.localStorage.getItem("unimath_sidebar_collapsed");
+    if (storedValue === "true") {
+      setCollapsed(true);
+    }
+    setReady(true);
+  }, []);
+
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
+    if (signingOut) return;
+
+    setSigningOut(true);
+
+    try {
+      await supabase.auth.signOut();
+    } finally {
+      router.replace("/login");
+      router.refresh();
+      window.location.href = "/login";
+    }
+  };
+
+  const handleToggleSidebar = () => {
+    setCollapsed((prev) => {
+      const nextValue = !prev;
+      window.localStorage.setItem(
+        "unimath_sidebar_collapsed",
+        String(nextValue)
+      );
+      return nextValue;
+    });
   };
 
   const displayName =
@@ -75,7 +105,8 @@ export function AppSidebar({ user }: { user: User }) {
           variant="ghost"
           size="icon"
           className={cn("ml-auto h-8 w-8 flex-shrink-0", collapsed && "ml-0")}
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={handleToggleSidebar}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
         </Button>
@@ -112,12 +143,13 @@ export function AppSidebar({ user }: { user: User }) {
             "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium w-full transition-all duration-200",
             "text-muted-foreground hover:text-foreground hover:bg-accent"
           )}
+          aria-label="Toggle theme"
         >
           <Sun className="h-[18px] w-[18px] flex-shrink-0 dark:hidden" />
           <Moon className="h-[18px] w-[18px] flex-shrink-0 hidden dark:block" />
           {!collapsed && (
             <span suppressHydrationWarning>
-              {resolvedTheme === "dark" ? "Light mode" : "Dark mode"}
+              {ready && resolvedTheme === "dark" ? "Light mode" : "Dark mode"}
             </span>
           )}
         </button>
@@ -141,9 +173,10 @@ export function AppSidebar({ user }: { user: User }) {
             "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium w-full transition-all duration-200",
             "text-muted-foreground hover:text-foreground hover:bg-accent"
           )}
+          aria-label="Sign out"
         >
           <LogOut className="h-[18px] w-[18px] flex-shrink-0" />
-          {!collapsed && <span>Sign out</span>}
+          {!collapsed && <span>{signingOut ? "Signing out..." : "Sign out"}</span>}
         </button>
 
         <Separator className="opacity-50" />
