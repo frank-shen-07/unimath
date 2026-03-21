@@ -104,7 +104,7 @@ export function AppSidebar({
     user.email?.split("@")[0] ||
     "User";
 
-  const avatarUrl = user.image;
+  const avatarUrl = user.image ?? undefined;
 
   return (
     <aside
