@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { MathRenderer } from "@/components/math-renderer";
-import { createClient } from "@/lib/supabase/client";
 import { PRACTICE_TOPICS, resolveTopicScope } from "@/lib/topics";
 import { EditorialHeader, EditorialPage } from "@/components/editorial";
 import { motion, AnimatePresence } from "framer-motion";
@@ -103,17 +102,18 @@ export default function PracticePage() {
 
   const savePracticeSession = async () => {
     try {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
       const correct = results.filter(Boolean).length;
-      await supabase.from("practice_sessions").insert({
-        user_id: user.id,
-        topic: activeTopicLabel || topic,
-        difficulty,
-        total_questions: questions.length,
-        correct_answers: correct,
+      await fetch("/api/practice-sessions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          topic: activeTopicLabel || topic,
+          difficulty,
+          totalQuestions: questions.length,
+          correctAnswers: correct,
+        }),
       });
     } catch {}
   };

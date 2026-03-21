@@ -1,20 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { MathRenderer } from "@/components/math-renderer";
 import { EditorialPanel } from "@/components/editorial";
-import { createClient } from "@/lib/supabase/client";
 import type { Flashcard, FlashcardDeck } from "@/lib/types";
 
 type LoadedDeck = FlashcardDeck & { flashcards: Flashcard[] };
 
 export function FlashcardDeckViewer({ deckId }: { deckId: string }) {
-  const supabase = useMemo(() => createClient(), []);
   const [deck, setDeck] = useState<LoadedDeck | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -23,38 +21,23 @@ export function FlashcardDeckViewer({ deckId }: { deckId: string }) {
   const loadDeck = useCallback(async () => {
     setLoading(true);
 
-    const { data: deckData, error: deckError } = await supabase
-      .from("flashcard_decks")
-      .select("*")
-      .eq("id", deckId)
-      .single();
+    const response = await fetch(`/api/flashcard-decks/${deckId}`);
+    const payload = await response.json();
 
-    if (deckError || !deckData) {
+    if (!response.ok || !payload.deck) {
       toast.error("Could not open this deck");
       setLoading(false);
       return;
     }
 
-    const { data: cards, error: cardsError } = await supabase
-      .from("flashcards")
-      .select("*")
-      .eq("deck_id", deckId)
-      .order("sort_order", { ascending: true });
-
-    if (cardsError) {
-      toast.error("Could not load flashcards");
-      setLoading(false);
-      return;
-    }
-
     setDeck({
-      ...(deckData as FlashcardDeck),
-      flashcards: (cards as Flashcard[]) || [],
+      ...(payload.deck as FlashcardDeck),
+      flashcards: (payload.flashcards as Flashcard[]) || [],
     });
     setActiveIndex(0);
     setFlipped(false);
     setLoading(false);
-  }, [deckId, supabase]);
+  }, [deckId]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {

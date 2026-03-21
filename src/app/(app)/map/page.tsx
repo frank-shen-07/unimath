@@ -29,7 +29,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/client";
 import {
   DEFAULT_TOPICS,
   DEFAULT_EDGES,
@@ -253,19 +252,16 @@ export default function MapPage() {
 
   useEffect(() => {
     const load = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase
-          .from("topic_nodes")
-          .select("*")
-          .eq("user_id", user.id);
-        if (data) {
-          setUserTopics(data);
-          buildGraph(data);
-          return;
-        }
+      const response = await fetch("/api/topic-nodes");
+      const payload = await response.json();
+
+      if (response.ok && Array.isArray(payload.topicNodes)) {
+        const nextTopics = payload.topicNodes as TopicNode[];
+        setUserTopics(nextTopics);
+        buildGraph(nextTopics);
+        return;
       }
+
       buildGraph([]);
     };
     load();

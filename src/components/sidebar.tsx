@@ -1,16 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import type { User } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/client";
+import { signOut } from "next-auth/react";
+import type { AppAuthSource } from "@/lib/auth/session";
 import {
   LayoutDashboard,
   MessageSquare,
@@ -37,7 +37,20 @@ const navItems = [
   { href: "/map", label: "Knowledge Map", icon: Map },
 ];
 
-export function AppSidebar({ user }: { user: User }) {
+type SidebarUser = {
+  id: string;
+  email?: string | null;
+  name?: string | null;
+  image?: string | null;
+};
+
+export function AppSidebar({
+  user,
+  authSource,
+}: {
+  user: SidebarUser;
+  authSource: AppAuthSource;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const { setTheme, resolvedTheme } = useTheme();
@@ -60,7 +73,14 @@ export function AppSidebar({ user }: { user: User }) {
     setSigningOut(true);
 
     try {
-      await supabase.auth.signOut();
+      if (authSource === "supabase") {
+        await supabase.auth.signOut();
+      } else {
+        await signOut({
+          callbackUrl: "/login",
+          redirect: false,
+        });
+      }
     } finally {
       router.replace("/login");
       router.refresh();
@@ -80,12 +100,11 @@ export function AppSidebar({ user }: { user: User }) {
   };
 
   const displayName =
-    user.user_metadata?.full_name ||
-    user.user_metadata?.name ||
+    user.name ||
     user.email?.split("@")[0] ||
     "User";
 
-  const avatarUrl = user.user_metadata?.avatar_url || user.user_metadata?.picture;
+  const avatarUrl = user.image;
 
   return (
     <aside

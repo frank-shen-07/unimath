@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/client";
 import { useTheme } from "next-themes";
 import { EditorialPage, EditorialPanel } from "@/components/editorial";
 import { Sun, Moon, Monitor, Key } from "lucide-react";
 import { toast } from "sonner";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { useAppSession } from "@/lib/auth/use-app-session";
 
 type ApiKeyState = {
   gemini: string;
@@ -27,26 +26,25 @@ const EMPTY_API_KEYS: ApiKeyState = {
 };
 
 export default function SettingsPage() {
-  const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [apiKeys, setApiKeys] = useState<ApiKeyState>(EMPTY_API_KEYS);
-  const { theme, setTheme } = useTheme();
-  const supabase = useMemo(() => createClient(), []);
+  const [apiKeys, setApiKeys] = useState<ApiKeyState>(() => {
+    if (typeof window === "undefined") {
+      return EMPTY_API_KEYS;
+    }
 
-  useEffect(() => {
-    const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      const saved = localStorage.getItem("unimath_api_keys");
-      if (saved) {
-        try {
-          setApiKeys({ ...EMPTY_API_KEYS, ...JSON.parse(saved) });
-        } catch {
-          setApiKeys(EMPTY_API_KEYS);
-        }
-      }
-    };
-    load();
-  }, [supabase]);
+    const saved = window.localStorage.getItem("unimath_api_keys");
+
+    if (!saved) {
+      return EMPTY_API_KEYS;
+    }
+
+    try {
+      return { ...EMPTY_API_KEYS, ...JSON.parse(saved) };
+    } catch {
+      return EMPTY_API_KEYS;
+    }
+  });
+  const { theme, setTheme } = useTheme();
+  const { session } = useAppSession();
 
   const handleSaveKeys = () => {
     localStorage.setItem("unimath_api_keys", JSON.stringify(apiKeys));
@@ -54,9 +52,8 @@ export default function SettingsPage() {
   };
 
   const displayName =
-    user?.user_metadata?.full_name ||
-    user?.user_metadata?.name ||
-    user?.email?.split("@")[0] ||
+    session?.user?.name ||
+    session?.user?.email?.split("@")[0] ||
     "User";
 
   return (
@@ -72,7 +69,7 @@ export default function SettingsPage() {
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
             Signed in as {displayName}
-            {user?.email ? ` (${user.email})` : ""}.
+            {session?.user?.email ? ` (${session.user.email})` : ""}.
           </p>
           <div className="mt-5 grid grid-cols-3 gap-3">
             {[

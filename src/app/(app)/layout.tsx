@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { getServerAuthSession } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
 import { AppSidebar } from "@/components/sidebar";
 
@@ -7,16 +7,15 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const session = await getServerAuthSession();
 
-  if (!user) {
+  if (!session?.user?.id) {
     redirect("/login");
   }
 
   return (
     <div className="unimath-shell flex min-h-screen overflow-hidden">
-      <AppSidebar user={user} />
+      <AppSidebar user={session.user} authSource={session.authSource} />
       <main className="relative flex-1 overflow-y-auto">
         {children}
       </main>

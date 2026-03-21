@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { createClient } from "@/lib/supabase/client";
 import { EditorialHeader, EditorialPage, EditorialPanel } from "@/components/editorial";
 import { MessageSquare, Dumbbell, Clock, Target, ArrowRight } from "lucide-react";
 import type { Conversation, PracticeSession } from "@/lib/types";
@@ -17,16 +16,14 @@ export default function HistoryPage() {
 
   useEffect(() => {
     const load = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setLoading(false); return; }
+      const response = await fetch("/api/history");
+      const data = await response.json();
 
-      const [convs, sess] = await Promise.all([
-        supabase.from("conversations").select("*").eq("user_id", user.id).order("updated_at", { ascending: false }),
-        supabase.from("practice_sessions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-      ]);
-      setConversations(convs.data || []);
-      setSessions(sess.data || []);
+      if (response.ok) {
+        setConversations((data.conversations as Conversation[]) || []);
+        setSessions((data.sessions as PracticeSession[]) || []);
+      }
+
       setLoading(false);
     };
     load();

@@ -1,11 +1,14 @@
 import { extractTextFromDocument } from "@/lib/document-text";
 import { generateFlashcards } from "@/lib/gemini";
+import { requireServerAuthSession } from "@/lib/auth/session";
 import { NextRequest } from "next/server";
 
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   try {
+    await requireServerAuthSession();
+
     const contentType = request.headers.get("content-type") || "";
     let topic = "";
     let notes = "";
@@ -49,6 +52,10 @@ export async function POST(request: NextRequest) {
       sourceText: notes || null,
     });
   } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     console.error("Flashcards API error:", error);
     return Response.json(
       { error: error instanceof Error ? error.message : "Failed to generate flashcards" },

@@ -1,5 +1,6 @@
 import { classifyTopic } from "@/lib/gemini";
-import { createClient } from "@/lib/supabase/server";
+import { getServerAuthSession } from "@/lib/auth/session";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -12,14 +13,14 @@ export async function POST(request: NextRequest) {
 
     const topicName = await classifyTopic(question);
 
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const session = await getServerAuthSession();
 
-    if (user) {
+    if (session?.user?.id) {
+      const supabase = createAdminClient();
       const { data: existing } = await supabase
         .from("topic_nodes")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", session.user.id)
         .eq("topic_name", topicName)
         .single();
 
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
           .eq("id", existing.id);
       } else {
         await supabase.from("topic_nodes").insert({
-          user_id: user.id,
+          user_id: session.user.id,
           topic_name: topicName,
           category: getCategoryForTopic(topicName),
           practice_count: 1,

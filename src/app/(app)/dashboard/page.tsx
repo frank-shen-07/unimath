@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { EditorialHeader, EditorialPage, EditorialPanel, EditorialStat } from "@/components/editorial";
 import type { FlashcardDeck, PracticeSession } from "@/lib/types";
 import { MATH_QUOTES } from "@/lib/math-quotes";
@@ -18,31 +17,13 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const load = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserName(
-          user.user_metadata?.full_name ||
-          user.user_metadata?.name ||
-          user.email?.split("@")[0] ||
-          "Student"
-        );
+      const response = await fetch("/api/dashboard");
+      const data = await response.json();
 
-        const { data: sess } = await supabase
-          .from("practice_sessions")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(10);
-        setSessions(sess || []);
-
-        const { data: savedDecks } = await supabase
-          .from("flashcard_decks")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("updated_at", { ascending: false })
-          .limit(6);
-        setDecks(savedDecks || []);
+      if (response.ok) {
+        setUserName(data.userName || "Student");
+        setSessions((data.sessions as PracticeSession[]) || []);
+        setDecks((data.decks as FlashcardDeck[]) || []);
       }
     };
     load();

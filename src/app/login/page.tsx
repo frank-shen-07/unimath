@@ -1,23 +1,28 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Home, Lock, Mail, User } from "lucide-react";
+import { Eye, EyeOff, Home } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { useAppSession } from "@/lib/auth/use-app-session";
 
 function GoogleButton({
   label,
   onClick,
+  disabled,
 }: {
   label: string;
   onClick: () => void | Promise<void>;
+  disabled?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
-      className="unimath-pill flex w-full items-center justify-center gap-2 rounded-sm py-3 text-sm font-medium text-foreground transition-all duration-200 hover:bg-accent/70"
+      disabled={disabled}
+      className="unimath-pill flex w-full items-center justify-center gap-2 rounded-sm py-3 text-sm font-medium text-foreground transition-all duration-200 hover:bg-accent/70 disabled:cursor-not-allowed disabled:opacity-60"
     >
       <svg className="h-5 w-5" viewBox="0 0 24 24">
         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -31,97 +36,216 @@ function GoogleButton({
 }
 
 export default function LoginPage() {
-  const [isLogin, setIsLogin] = useState(true);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { session, loading: sessionLoading } = useAppSession();
+  const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
 
-  const supabase = createClient();
-  const router = useRouter();
+  useEffect(() => {
+    const errorParam = searchParams.get("error");
+
+    if (errorParam === "OAuthCallback") {
+      setError("Google sign-in failed. Please try again.");
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (session?.user?.id) {
+      router.replace("/dashboard");
+    }
+  }, [router, session]);
+
+  const getCallbackUrl = (nextPath: string) =>
+    `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
+
+  const resolveIdentifierToEmail = async (value: string) => {
+    if (value.includes("@")) {
+      return value.trim().toLowerCase();
+    }
+
+    const response = await fetch("/api/auth/resolve-identifier", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        identifier: value,
+      }),
+    });
+
+    const payload = await response.json();
+
+    if (!response.ok) {
+      throw new Error(payload.error || "Could not resolve account.");
+    }
+
+    return (payload.email as string | null) ?? null;
+  };
 
   const handleGoogleAuth = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setSuccessMessage("");
     setLoading(true);
+    setError("");
+    setSuccess("");
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      setError(error.message);
+    try {
+      await signIn("google", {
+        callbackUrl: "/dashboard",
+      });
+    } catch {
+      setError("Could not start Google sign-in.");
       setLoading(false);
-      return;
     }
-
-    router.push("/dashboard");
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setSuccessMessage("");
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    if (!agreedToTerms) {
-      setError("You must agree to the terms");
-      return;
-    }
-
+  const handleLocalLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
     setLoading(true);
+    setError("");
+    setSuccess("");
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: displayName,
-          name: displayName,
+    try {
+      const resolvedEmail = await resolveIdentifierToEmail(identifier.trim());
+
+      if (!resolvedEmail) {
+        throw new Error("Invalid email, username, or password.");
+      }
+
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: resolvedEmail,
+        password,
+      });
+
+      if (signInError) {
+        throw signInError;
+      }
+
+      router.replace("/dashboard");
+      router.refresh();
+    } catch (loginError) {
+      setError(
+        loginError instanceof Error
+          ? loginError.message
+          : "Could not sign you in."
+      );
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      if (!email.trim()) {
+        throw new Error("Email is required.");
+      }
+
+      if (!username.trim()) {
+        throw new Error("Username is required.");
+      }
+
+      if (username.includes("@")) {
+        throw new Error("Username cannot contain '@'.");
+      }
+
+      if (password.length < 8) {
+        throw new Error("Password must be at least 8 characters.");
+      }
+
+      if (password !== confirmPassword) {
+        throw new Error("Passwords do not match.");
+      }
+
+      const usernameLookup = await resolveIdentifierToEmail(username.trim());
+      if (usernameLookup) {
+        throw new Error("That username is already taken.");
+      }
+
+      const supabase = createClient();
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
+        password,
+        options: {
+          emailRedirectTo: getCallbackUrl("/dashboard"),
+          data: {
+            full_name: username.trim(),
+            name: username.trim(),
+            username: username.trim(),
+          },
         },
-      },
-    });
+      });
 
-    if (error) {
-      setError(error.message);
+      if (signUpError) {
+        throw signUpError;
+      }
+
+      setSuccess(
+        "Check your inbox to verify your email. Once verified, you'll be redirected back into the app."
+      );
+      setMode("login");
+    } catch (registerError) {
+      setError(
+        registerError instanceof Error
+          ? registerError.message
+          : "Could not create your account."
+      );
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setSuccessMessage("Check your email to confirm your account.");
-    setLoading(false);
   };
 
-  const switchMode = () => {
-    setIsLogin((value) => !value);
+  const handleForgotPassword = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setLoading(true);
     setError("");
-    setSuccessMessage("");
+    setSuccess("");
+
+    try {
+      const resolvedEmail = await resolveIdentifierToEmail(identifier.trim());
+
+      if (resolvedEmail) {
+        const supabase = createClient();
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+          resolvedEmail,
+          {
+            redirectTo: getCallbackUrl("/reset-password"),
+          }
+        );
+
+        if (resetError) {
+          throw resetError;
+        }
+      }
+
+      setSuccess(
+        "If that account exists, a password reset link has been sent."
+      );
+    } catch (forgotError) {
+      setError(
+        forgotError instanceof Error
+          ? forgotError.message
+          : "Could not start password reset."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="unimath-shell min-h-screen px-4 py-8">
+    <div className="unimath-shell min-h-screen px-4 pb-8 pt-0">
       <Link
         href="/"
         className="unimath-pill fixed left-6 top-6 z-50 flex h-10 w-10 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -129,247 +253,231 @@ export default function LoginPage() {
         <Home className="h-5 w-5" />
       </Link>
 
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-5xl items-center">
-        <div className="unimath-panel mx-auto w-full overflow-hidden rounded-xl">
+      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-4xl items-center">
+        <div className="mx-auto w-full max-w-2xl overflow-hidden rounded-xl">
           <motion.div
-            className="flex w-[200%]"
-            animate={{ x: isLogin ? "0%" : "-50%" }}
-            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            className="px-6 py-8 sm:px-8 lg:px-10 lg:py-12"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="w-1/2 shrink-0 px-6 py-8 sm:px-8 lg:px-10 lg:py-12">
-              <div className="grid gap-8 lg:grid-cols-[0.85fr,1.15fr] lg:items-center">
-                <div className="flex min-h-[220px] items-center justify-center">
-                  <div className="max-w-sm text-center lg:text-left">
-                    <p className="font-serif text-4xl leading-tight tracking-[-0.05em] text-foreground sm:text-5xl">
-                      Don&apos;t have an account?
-                    </p>
-                    <button
-                      type="button"
-                      onClick={switchMode}
-                      className="mt-6 inline-flex min-w-[220px] items-center justify-center rounded-sm bg-primary px-6 py-3.5 text-base font-semibold text-primary-foreground transition hover:opacity-90"
-                    >
-                      Register
-                    </button>
+            <div className="unimath-panel-muted mx-auto w-full rounded-lg p-5 sm:p-6">
+              <div className="mb-6">
+                <h2 className="mt-3 font-serif text-5xl leading-none tracking-[-0.04em] text-foreground">
+                  {mode === "register"
+                    ? "Create account"
+                    : mode === "forgot"
+                      ? "Reset password"
+                      : "Welcome back"}
+                </h2>
+              </div>
+
+              <div className="mb-4 flex gap-2">
+                {[
+                  ["login", "Login"],
+                  ["register", "Register"],
+                  ["forgot", "Forgot Password?"],
+                ].map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => {
+                      setMode(value as "login" | "register" | "forgot");
+                      setError("");
+                      setSuccess("");
+                    }}
+                    className={`rounded-sm px-3 py-1 text-sm transition ${
+                      mode === value
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-accent/70 hover:text-foreground"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {mode === "login" ? (
+                <form onSubmit={handleLocalLogin} className="space-y-3">
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-foreground">
+                      Email or username
+                    </label>
+                    <input
+                      value={identifier}
+                      onChange={(event) => setIdentifier(event.target.value)}
+                      required
+                      className="unimath-input h-10.5 w-full rounded-md px-4 text-foreground"
+                    />
                   </div>
-                </div>
-
-                <div className="unimath-panel-muted mx-auto w-full max-w-[560px] rounded-lg p-6 sm:p-8">
-                  <div className="mb-8">
-                    <p className="font-label text-[11px] text-muted-foreground">Welcome back</p>
-                    <h1 className="mt-3 font-serif text-5xl leading-none tracking-[-0.04em] text-foreground">
-                      Login
-                    </h1>
-                  </div>
-
-                  <form onSubmit={handleLogin} className="space-y-4">
-                    <div className="unimath-input flex items-center gap-3 rounded-md px-4 py-3">
-                      <Mail className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                      <div className="flex-1">
-                        <label className="block text-xs text-muted-foreground">Email</label>
-                        <input
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder="name@email.com"
-                          required
-                          className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="unimath-input flex items-center gap-3 rounded-md px-4 py-3">
-                      <Lock className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                      <div className="flex-1">
-                        <label className="block text-xs text-muted-foreground">Password</label>
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          placeholder="••••••••"
-                          required
-                          className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
-                        />
-                      </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-foreground">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
+                        required
+                        className="unimath-input h-10.5 w-full rounded-md px-4 pr-11 text-foreground"
+                      />
                       <button
                         type="button"
                         onClick={() => setShowPassword((value) => !value)}
-                        className="flex-shrink-0 text-muted-foreground hover:text-foreground"
+                        className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground hover:text-foreground"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
                       >
-                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </button>
                     </div>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading || sessionLoading}
+                    className="w-full rounded-sm bg-primary py-2.25 text-base font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-60"
+                  >
+                    {loading ? "Signing in..." : "Sign in"}
+                  </button>
+                </form>
+              ) : null}
 
-                    <div className="flex items-center justify-between gap-3 text-sm">
-                      <label className="flex cursor-pointer items-center gap-2 text-muted-foreground">
-                        <input
-                          type="checkbox"
-                          checked={rememberMe}
-                          onChange={(e) => setRememberMe(e.target.checked)}
-                          className="rounded-none border-border bg-transparent accent-white"
-                        />
-                        Remember me
-                      </label>
-                      <button type="button" className="font-medium text-foreground/60 hover:text-foreground">
-                        Forgot password?
+              {mode === "register" ? (
+                <form onSubmit={handleRegister} className="space-y-2.5">
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-foreground">
+                      Username
+                    </label>
+                    <input
+                      value={username}
+                      onChange={(event) => setUsername(event.target.value)}
+                      required
+                      className="unimath-input h-10 w-full rounded-md px-4 text-foreground"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-foreground">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      required
+                      className="unimath-input h-10 w-full rounded-md px-4 text-foreground"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-foreground">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
+                        required
+                        minLength={8}
+                        className="unimath-input h-10 w-full rounded-md px-4 pr-11 text-foreground"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((value) => !value)}
+                        className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground hover:text-foreground"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </button>
                     </div>
-
-                    {isLogin && error ? (
-                      <p className="text-center text-sm text-red-400">{error}</p>
-                    ) : null}
-
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full rounded-sm bg-primary py-3 text-base font-semibold text-primary-foreground transition-all duration-200 hover:opacity-90 disabled:opacity-60"
-                    >
-                      {loading ? "Logging in..." : "Login"}
-                    </button>
-                  </form>
-
-                  <div className="my-5 flex items-center gap-4">
-                    <div className="h-px flex-1 bg-border" />
-                    <span className="text-sm text-muted-foreground">or</span>
-                    <div className="h-px flex-1 bg-border" />
                   </div>
-
-                  <GoogleButton label="Continue with Google" onClick={handleGoogleAuth} />
-                </div>
-              </div>
-            </div>
-
-            <div className="w-1/2 shrink-0 px-6 py-8 sm:px-8 lg:px-10 lg:py-12">
-              <div className="grid gap-8 lg:grid-cols-[1.15fr,0.85fr] lg:items-center">
-                <div className="unimath-panel-muted mx-auto w-full max-w-[560px] rounded-lg p-6 sm:p-8">
-                  <div className="mb-6">
-                    <p className="font-label text-[11px] text-muted-foreground">Create account</p>
-                    <h1 className="mt-3 font-serif text-5xl leading-none tracking-[-0.04em] text-foreground">
-                      Register
-                    </h1>
-                  </div>
-
-                  <form onSubmit={handleRegister} className="space-y-3.5">
-                    <div className="unimath-input flex items-center gap-3 rounded-md px-4 py-3">
-                      <Mail className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                      <div className="flex-1">
-                        <label className="block text-xs text-muted-foreground">Email</label>
-                        <input
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder="name@email.com"
-                          required
-                          className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="unimath-input flex items-center gap-3 rounded-md px-4 py-3">
-                      <User className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                      <div className="flex-1">
-                        <label className="block text-xs text-muted-foreground">Display name</label>
-                        <input
-                          type="text"
-                          value={displayName}
-                          onChange={(e) => setDisplayName(e.target.value)}
-                          placeholder="Your name"
-                          required
-                          className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="unimath-input flex items-center gap-3 rounded-md px-4 py-3">
-                      <Lock className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                      <div className="flex-1">
-                        <label className="block text-xs text-muted-foreground">Password</label>
-                        <input
-                          type={showPassword ? "text" : "password"}
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          placeholder="••••••••"
-                          required
-                          className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="unimath-input flex items-center gap-3 rounded-md px-4 py-3">
-                      <Lock className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                      <div className="flex-1">
-                        <label className="block text-xs text-muted-foreground">Confirm password</label>
-                        <input
-                          type={showConfirmPassword ? "text" : "password"}
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          placeholder="••••••••"
-                          required
-                          className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground/50"
-                        />
-                      </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-foreground">
+                      Confirm password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={confirmPassword}
+                        onChange={(event) => setConfirmPassword(event.target.value)}
+                        required
+                        minLength={8}
+                        className="unimath-input h-10 w-full rounded-md px-4 pr-11 text-foreground"
+                      />
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword((value) => !value)}
-                        className="flex-shrink-0 text-muted-foreground hover:text-foreground"
+                        className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-muted-foreground hover:text-foreground"
+                        aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                       >
-                        {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </button>
                     </div>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full rounded-sm bg-primary py-2.25 text-base font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-60"
+                  >
+                    {loading ? "Creating account..." : "Create account"}
+                  </button>
+                </form>
+              ) : null}
 
-                    <label className="flex cursor-pointer items-start gap-2 text-sm text-muted-foreground">
-                      <input
-                        type="checkbox"
-                        checked={agreedToTerms}
-                        onChange={(e) => setAgreedToTerms(e.target.checked)}
-                        className="mt-0.5 rounded-none border-border bg-transparent accent-white"
-                      />
-                      <span>
-                        I have read and agree to the{" "}
-                        <span className="underline text-foreground">Disclaimer</span>.
-                      </span>
+              {mode === "forgot" ? (
+                <form onSubmit={handleForgotPassword} className="space-y-3">
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-foreground">
+                      Email or username
                     </label>
-
-                    {!isLogin && error ? (
-                      <p className="text-center text-sm text-red-400">{error}</p>
-                    ) : null}
-
-                    {!isLogin && successMessage ? (
-                      <p className="text-center text-sm text-green-400">{successMessage}</p>
-                    ) : null}
-
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full rounded-sm bg-primary py-3 text-base font-semibold text-primary-foreground transition-all duration-200 hover:opacity-90 disabled:opacity-60"
-                    >
-                      {loading ? "Creating account..." : "Register"}
-                    </button>
-                  </form>
-
-                  <div className="my-4 flex items-center gap-4">
-                    <div className="h-px flex-1 bg-border" />
-                    <span className="text-sm text-muted-foreground">or</span>
-                    <div className="h-px flex-1 bg-border" />
+                    <input
+                      value={identifier}
+                      onChange={(event) => setIdentifier(event.target.value)}
+                      required
+                      className="unimath-input h-10.5 w-full rounded-md px-4 text-foreground"
+                    />
                   </div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full rounded-sm bg-primary py-2.25 text-base font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-60"
+                  >
+                    {loading ? "Sending reset link..." : "Send reset link"}
+                  </button>
+                </form>
+              ) : null}
 
-                  <GoogleButton label="Join with Google" onClick={handleGoogleAuth} />
-                </div>
+              {error ? (
+                <p className="mt-4 text-center text-sm text-red-400">{error}</p>
+              ) : null}
+              {success ? (
+                <p className="mt-4 text-center text-sm text-green-400">
+                  {success}
+                </p>
+              ) : null}
 
-                <div className="flex min-h-[220px] items-center justify-center">
-                  <div className="max-w-sm text-center lg:text-left">
-                    <p className="font-serif text-4xl leading-tight tracking-[-0.05em] text-foreground sm:text-5xl">
-                      Already have an account?
-                    </p>
-                    <button
-                      type="button"
-                      onClick={switchMode}
-                      className="mt-6 inline-flex min-w-[220px] items-center justify-center rounded-sm bg-primary px-6 py-3.5 text-base font-semibold text-primary-foreground transition hover:opacity-90"
-                    >
-                      Login
-                    </button>
-                  </div>
-                </div>
+              <div className="my-4 flex items-center gap-4">
+                <div className="h-px flex-1 bg-border" />
+                <span className="text-sm text-muted-foreground">or</span>
+                <div className="h-px flex-1 bg-border" />
               </div>
+
+              <GoogleButton
+                label={loading ? "Redirecting to Google..." : "Continue with Google"}
+                onClick={handleGoogleAuth}
+                disabled={loading || sessionLoading}
+              />
             </div>
           </motion.div>
         </div>

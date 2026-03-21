@@ -9,7 +9,6 @@ import { insertLatexAtCursor } from "@/lib/insert-latex";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, ImagePlus, X, Loader2, Sparkles, ArrowLeft } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import type { Message } from "@/lib/types";
 
@@ -34,23 +33,16 @@ export default function ConversationPage({ params }: { params: Promise<{ id: str
 
   useEffect(() => {
     const load = async () => {
-      const supabase = createClient();
-      const { data: conv } = await supabase
-        .from("conversations")
-        .select("title")
-        .eq("id", id)
-        .single();
-      if (conv) setTitle(conv.title);
+      const response = await fetch(`/api/conversations/${id}`);
+      const payload = await response.json();
 
-      const { data: msgs } = await supabase
-        .from("messages")
-        .select("*")
-        .eq("conversation_id", id)
-        .order("created_at", { ascending: true });
+      if (response.ok) {
+        if (payload.conversation?.title) {
+          setTitle(payload.conversation.title as string);
+        }
 
-      if (msgs) {
         setMessages(
-          msgs.map((m: Message) => ({
+          ((payload.messages as Message[]) || []).map((m: Message) => ({
             role: m.role,
             content: m.content,
           }))

@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { createClient } from "@/lib/supabase/client";
 import { DEFAULT_TOPICS } from "@/lib/topics";
 import { TopicAutocomplete } from "@/components/topic-autocomplete";
 import { EditorialPage, EditorialPanel } from "@/components/editorial";
@@ -17,7 +16,6 @@ import { BookCopy, FileText, Loader2, Sparkles, Upload, Wand2 } from "lucide-rea
 import { toast } from "sonner";
 
 export default function FlashcardsPage() {
-  const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const notesRef = useRef<HTMLTextAreaElement>(null);
@@ -32,67 +30,44 @@ export default function FlashcardsPage() {
 
   const loadDecks = useCallback(async () => {
     setLoadingDecks(true);
-    const { data: auth } = await supabase.auth.getUser();
-    if (!auth.user) {
-      setLoadingDecks(false);
-      return;
-    }
+    const response = await fetch("/api/flashcard-decks");
+    const payload = await response.json();
 
-    const { data, error } = await supabase
-      .from("flashcard_decks")
-      .select("*")
-      .eq("user_id", auth.user.id)
-      .order("updated_at", { ascending: false });
-
-    if (error) {
+    if (!response.ok) {
       toast.error("Could not load flashcard decks");
     } else {
-      setDecks((data as FlashcardDeck[]) || []);
+      setDecks((payload.decks as FlashcardDeck[]) || []);
     }
 
     setLoadingDecks(false);
-  }, [supabase]);
+  }, []);
 
   useEffect(() => {
     void loadDecks();
   }, [loadDecks]);
 
   const saveDeck = useCallback(async (title: string, cards: GeneratedFlashcard[], sourceText: string | null) => {
-    const { data: auth } = await supabase.auth.getUser();
-    if (!auth.user) {
-      throw new Error("You need to be logged in");
-    }
-
-    const { data: deck, error: deckError } = await supabase
-      .from("flashcard_decks")
-      .insert({
-        user_id: auth.user.id,
+    const response = await fetch("/api/flashcard-decks", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         title,
         topic: topic || null,
-        source_text: sourceText,
-        card_count: cards.length,
-      })
-      .select()
-      .single();
+        sourceText,
+        cards,
+      }),
+    });
 
-    if (deckError || !deck) {
-      throw deckError || new Error("Could not save deck");
+    const payload = await response.json();
+
+    if (!response.ok || !payload.deckId) {
+      throw new Error(payload.error || "Could not save deck");
     }
 
-    const payload = cards.map((card, index) => ({
-      deck_id: deck.id,
-      front: card.front,
-      back: card.back,
-      sort_order: index,
-    }));
-
-    const { error: cardsError } = await supabase.from("flashcards").insert(payload);
-    if (cardsError) {
-      throw cardsError;
-    }
-
-    return deck.id;
-  }, [supabase, topic]);
+    return payload.deckId as string;
+  }, [topic]);
 
   async function handleGenerate() {
     if (!topic.trim() && !notes.trim() && !documentFile) {

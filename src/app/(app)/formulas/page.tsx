@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MathRenderer } from "@/components/math-renderer";
-import { createClient } from "@/lib/supabase/client";
 import { PRACTICE_TOPICS, resolveTopicScope } from "@/lib/topics";
 import { EditorialHeader, EditorialPage } from "@/components/editorial";
 import { motion } from "framer-motion";
@@ -44,15 +43,13 @@ export default function FormulasPage() {
   }, []);
 
   const loadSheets = async () => {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setLoading(false); return; }
-    const { data } = await supabase
-      .from("formula_sheets")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-    setSheets(data || []);
+    const response = await fetch("/api/formula-sheets");
+    const payload = await response.json();
+
+    if (response.ok) {
+      setSheets((payload.sheets as FormulaSheet[]) || []);
+    }
+
     setLoading(false);
   };
 
@@ -82,23 +79,21 @@ export default function FormulasPage() {
 
   const handleSave = async () => {
     if (!activeSheet) return;
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data } = await supabase
-      .from("formula_sheets")
-      .insert({
-        user_id: user.id,
+    const response = await fetch("/api/formula-sheets", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         title: activeSheet.title,
         topic: activeScopeLabel || topicInput,
         formulas: activeSheet.sections,
-      })
-      .select()
-      .single();
+      }),
+    });
+    const payload = await response.json();
 
-    if (data) {
-      setSheets([data, ...sheets]);
+    if (response.ok && payload.sheet) {
+      setSheets([payload.sheet as FormulaSheet, ...sheets]);
       setActiveSheet(null);
       setActiveScopeLabel("");
       setTopicInput("");
@@ -106,8 +101,9 @@ export default function FormulasPage() {
   };
 
   const handleDelete = async (id: string) => {
-    const supabase = createClient();
-    await supabase.from("formula_sheets").delete().eq("id", id);
+    await fetch(`/api/formula-sheets/${id}`, {
+      method: "DELETE",
+    });
     setSheets(sheets.filter((s) => s.id !== id));
     if (selectedSheet?.id === id) {
       setSelectedSheet(null);
