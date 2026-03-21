@@ -1,6 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+/** Database-session NextAuth sets one of these (secure prefix on HTTPS). */
+function hasNextAuthSessionCookie(request: NextRequest) {
+  return Boolean(
+    request.cookies.get("next-auth.session-token")?.value ||
+      request.cookies.get("__Secure-next-auth.session-token")?.value
+  );
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -36,13 +44,18 @@ export async function updateSession(request: NextRequest) {
       request.nextUrl.pathname.startsWith("/api/")
   );
 
-  if (!user && !isPublic) {
+  const authedViaNextAuth = hasNextAuthSessionCookie(request);
+
+  // App supports Supabase email/password and NextAuth (Google). Middleware only
+  // refreshed Supabase cookies; Google sign-in leaves Supabase user null until
+  // a Supabase session exists, so we must not treat that as logged out.
+  if (!user && !authedViaNextAuth && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  if (user && request.nextUrl.pathname === "/login") {
+  if ((user || authedViaNextAuth) && request.nextUrl.pathname === "/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
